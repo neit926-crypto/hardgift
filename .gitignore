@@ -1,0 +1,7 @@
+*.db
+*.sqlite
+*.log
+*_backup*
+__pycache__/
+.env
+.gitignore~
