@@ -9,13 +9,64 @@
 
 const API_URL = 'https://hardgift.onrender.com';
 
+
+let cooldownTick = null;
+
+function startCaseCooldown(button, timer, seconds) {
+  timer.dataset.remaining = Math.max(0, seconds);
+  button.disabled = true;
+  button.textContent = 'Перезарядка';
+
+  if (!cooldownTick) {
+    cooldownTick = setInterval(() => {
+      document.querySelectorAll('.case-timer').forEach(el => {
+        let remaining = Math.max(0, Number(el.dataset.remaining || 0));
+        if (remaining > 0) remaining--;
+        el.dataset.remaining = remaining;
+
+        if (remaining === 0) {
+          el.textContent = 'Можно открывать!';
+          const btn = el.parentElement.querySelector('button');
+          if (btn) {
+            btn.disabled = false;
+            btn.textContent = 'Открыть';
+          }
+          return;
+        }
+
+        const h = String(Math.floor(remaining / 3600)).padStart(2, '0');
+        const m = String(Math.floor((remaining % 3600) / 60)).padStart(2, '0');
+        const sec = String(remaining % 60).padStart(2, '0');
+        el.textContent = 'Следующее открытие через ' + h + ':' + m + ':' + sec;
+      });
+    }, 1000);
+  }
+}
+
 async function loadCases() {
   const grid = document.getElementById('casesGrid');
   const status = document.getElementById('casesStatus');
+
   try {
     const response = await fetch(API_URL + '/cases');
     if (!response.ok) throw new Error('Ошибка загрузки кейсов');
+
     const cases = await response.json();
+    let cooldowns = {};
+
+    const initData = window.Telegram?.WebApp?.initData || '';
+
+    if (initData) {
+      const cdResponse = await fetch(API_URL + '/case-cooldowns', {
+        headers: {'X-Telegram-Init-Data': initData}
+      });
+
+      if (cdResponse.ok) {
+        const rows = await cdResponse.json();
+        rows.forEach(r => cooldowns[r.case_name] = r.remaining_seconds);
+      }
+    }
+
     grid.replaceChildren();
 
     cases.forEach(item => {
@@ -34,28 +85,45 @@ async function loadCases() {
       price.textContent = item.price_coins === 0
         ? 'Бесплатно' : item.price_coins + ' HARD COINS';
 
+      const timer = document.createElement('p');
+      timer.className = 'muted case-timer';
+
       const button = document.createElement('button');
       button.className = 'action';
+      button._caseTimer = timer;
 
       if (item.price_coins === 0) {
         button.textContent = 'Открыть';
         button.addEventListener('click', () => openCase(item.name, button));
+
+        const remaining = Number(cooldowns[item.name] || 0);
+        if (remaining > 0) {
+          startCaseCooldown(button, timer, remaining);
+        } else {
+          timer.textContent = 'Доступен';
+        }
       } else {
         button.textContent = 'Скоро';
         button.disabled = true;
+        timer.textContent = '';
       }
 
-      card.append(title, desc, price, button);
+      card.append(title, desc, price, timer, button);
       grid.append(card);
     });
+
     status.textContent = 'Выбирай бесплатный кейс!';
   } catch (error) {
+    console.error(error);
     status.textContent = 'Не удалось загрузить кейсы. Попробуй обновить страницу.';
   }
 }
 
+
 async function openCase(name, button) {
-  if (!tg.initData) {
+  const tg = window.Telegram?.WebApp;
+
+  if (!tg?.initData) {
     alert('Открой HARD GIFT через Telegram.');
     return;
   }
@@ -72,15 +140,34 @@ async function openCase(name, button) {
       },
       body: JSON.stringify({case_name: name})
     });
+
     const result = await response.json();
 
-    if (!response.ok) throw new Error(result.error || 'Не удалось открыть кейс');
+    if (response.status === 429) {
+      startCaseCooldown(
+        button,
+        button._caseTimer,
+        result.retry_after_seconds || 1
+      );
+      alert('⏳ Этот кейс ещё на перезарядке!');
+      return;
+    }
+
+    if (!response.ok) {
+      throw new Error(result.error || 'Не удалось открыть кейс');
+    }
+
+    startCaseCooldown(
+      button,
+      button._caseTimer,
+      result.cooldown_seconds || 86400
+    );
 
     alert('🎁 Тебе выпало: ' + result.reward + '\n' + result.description);
     await loadInventory();
+
   } catch (error) {
     alert(error.message);
-  } finally {
     button.disabled = false;
     button.textContent = 'Открыть';
   }

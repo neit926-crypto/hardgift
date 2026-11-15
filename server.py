@@ -119,6 +119,33 @@ def cases():
         ).fetchall()
     return jsonify([dict(r) for r in rows])
 
+@app.get("/case-cooldowns")
+@require_telegram
+def case_cooldowns():
+    with db() as con:
+        rows = con.execute(
+            """
+            SELECT c.name AS case_name,
+                   COALESCE(
+                       GREATEST(
+                           0,
+                           CEIL(EXTRACT(EPOCH FROM
+                               (cc.last_opened_at + INTERVAL '24 hours' - NOW())
+                           ))::INTEGER
+                       ), 0
+                   ) AS remaining_seconds
+            FROM cases c
+            LEFT JOIN case_cooldowns cc
+                ON cc.case_id = c.id
+                AND cc.telegram_id = %s
+            WHERE c.active = 1 AND c.price_coins = 0
+            """,
+            (g.telegram_id,)
+        ).fetchall()
+
+    return jsonify([dict(r) for r in rows])
+
+
 @app.post("/open-free-case")
 @require_telegram
 def open_free_case():
