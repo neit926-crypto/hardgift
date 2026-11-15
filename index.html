@@ -7,7 +7,7 @@
 
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 
-<style>
+ш<style>
 * {
   box-sizing: border-box;
   margin: 0;
@@ -173,6 +173,17 @@ header {
   font-size: 50px;
   margin-bottom: 12px;
 }
+
+.avatar-img {
+  width: 85px;
+  height: 85px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #555;
+  margin-bottom: 12px;
+  background: #222;
+}
+
 </style>
 </head>
 
@@ -252,9 +263,11 @@ header {
   <h2 class="section-title">Мой профиль</h2>
 
   <div class="profile">
-    <div class="avatar">👤</div>
-    <h2 id="username">HARD GIFT USER</h2>
-    <p class="muted">Добро пожаловать!</p>
+    <img id="avatar" class="avatar-img" src="" alt="Avatar">
+    <h2 id="username">Загрузка...</h2>
+    <p id="usernick" class="muted">@username</p>
+    <p id="userid" class="muted">Telegram ID: —</p>
+    <p class="muted">Добро пожаловать в HARD GIFT!</p>
   </div>
 
   <h2 class="section-title">Мои подарки</h2>
@@ -278,9 +291,25 @@ const tg = window.Telegram.WebApp;
 tg.ready();
 tg.expand();
 
-if (tg.initDataUnsafe && tg.initDataUnsafe.user) {
+const user = tg.initDataUnsafe?.user;
+
+if (user) {
   document.getElementById('username').textContent =
-    tg.initDataUnsafe.user.first_name;
+    [user.first_name, user.last_name].filter(Boolean).join(' ');
+
+  document.getElementById('usernick').textContent =
+    user.username ? '@' + user.username : 'Username отсутствует';
+
+  document.getElementById('userid').textContent =
+    'Telegram ID: ' + user.id;
+
+  if (user.photo_url) {
+    document.getElementById('avatar').src = user.photo_url;
+  }
+} else {
+  document.getElementById('username').textContent = 'Гость';
+  document.getElementById('usernick').textContent =
+    'Откройте через Telegram';
 }
 
 function openPage(id,button) {
@@ -304,3 +333,4 @@ function demo() {
 
 </body>
 </html>
+
