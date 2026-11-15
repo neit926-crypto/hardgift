@@ -8,6 +8,14 @@ from datetime import datetime, timezone
 
 app = Flask(__name__)
 
+@app.after_request
+def add_cors_headers(response):
+    response.headers["Access-Control-Allow-Origin"] = "https://neit926-crypto.github.io"
+    response.headers["Access-Control-Allow-Headers"] = "Content-Type, X-Telegram-Init-Data"
+    response.headers["Access-Control-Allow-Methods"] = "GET, POST, OPTIONS"
+    return response
+
+
 def db():
     url = os.environ.get("DATABASE_URL")
     if not url:

@@ -5,6 +5,126 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>HARD GIFT</title>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
+<script>
+
+const API_URL = 'https://hardgift.onrender.com';
+
+async function loadCases() {
+  const grid = document.getElementById('casesGrid');
+  const status = document.getElementById('casesStatus');
+  try {
+    const response = await fetch(API_URL + '/cases');
+    if (!response.ok) throw new Error('Ошибка загрузки кейсов');
+    const cases = await response.json();
+    grid.replaceChildren();
+
+    cases.forEach(item => {
+      const card = document.createElement('div');
+      card.className = 'card';
+
+      const title = document.createElement('h3');
+      title.textContent = item.name;
+
+      const desc = document.createElement('p');
+      desc.className = 'muted';
+      desc.textContent = item.description;
+
+      const price = document.createElement('div');
+      price.className = 'price';
+      price.textContent = item.price_coins === 0
+        ? 'Бесплатно' : item.price_coins + ' HARD COINS';
+
+      const button = document.createElement('button');
+      button.className = 'action';
+
+      if (item.price_coins === 0) {
+        button.textContent = 'Открыть';
+        button.addEventListener('click', () => openCase(item.name, button));
+      } else {
+        button.textContent = 'Скоро';
+        button.disabled = true;
+      }
+
+      card.append(title, desc, price, button);
+      grid.append(card);
+    });
+    status.textContent = 'Выбирай бесплатный кейс!';
+  } catch (error) {
+    status.textContent = 'Не удалось загрузить кейсы. Попробуй обновить страницу.';
+  }
+}
+
+async function openCase(name, button) {
+  if (!tg.initData) {
+    alert('Открой HARD GIFT через Telegram.');
+    return;
+  }
+
+  button.disabled = true;
+  button.textContent = 'Открываем...';
+
+  try {
+    const response = await fetch(API_URL + '/open-free-case', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Telegram-Init-Data': tg.initData
+      },
+      body: JSON.stringify({case_name: name})
+    });
+    const result = await response.json();
+
+    if (!response.ok) throw new Error(result.error || 'Не удалось открыть кейс');
+
+    alert('🎁 Тебе выпало: ' + result.reward + '\n' + result.description);
+    await loadInventory();
+  } catch (error) {
+    alert(error.message);
+  } finally {
+    button.disabled = false;
+    button.textContent = 'Открыть';
+  }
+}
+
+async function loadInventory() {
+  const list = document.getElementById('inventoryList');
+  if (!tg.initData) {
+    list.textContent = 'Открой приложение через Telegram, чтобы увидеть коллекцию.';
+    return;
+  }
+
+  try {
+    const response = await fetch(API_URL + '/inventory', {
+      headers: {'X-Telegram-Init-Data': tg.initData}
+    });
+    const items = await response.json();
+    if (!response.ok) throw new Error();
+
+    list.replaceChildren();
+    if (!items.length) {
+      list.textContent = 'Пока коллекция пуста.';
+      return;
+    }
+
+    items.forEach(item => {
+      const card = document.createElement('div');
+      card.className = 'card';
+      const title = document.createElement('h3');
+      title.textContent = '🎁 ' + item.item_name;
+      const source = document.createElement('p');
+      source.className = 'muted';
+      source.textContent = 'Получено из кейса: ' + item.source;
+      card.append(title, source);
+      list.append(card);
+    });
+  } catch {
+    list.textContent = 'Не удалось загрузить коллекцию.';
+  }
+}
+loadCases();
+
+
+</script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 body{background:#08070d;color:#fff;font-family:Arial,sans-serif;padding-bottom:85px}
@@ -62,12 +182,8 @@ header{padding:22px 17px;display:flex;justify-content:space-between;align-items:
 <section id="cases" class="page">
  <h2 class="heading">🎁 Кейсы</h2>
  <div class="notice">Награды и условия открытия будут показаны до открытия кейса. Случайные бесплатные награды подключим на сервере.</div>
- <div class="grid" style="margin-top:14px">
-  <div class="card"><div class="art">🌙</div><h3>Ночной</h3><p class="muted">4 коллекционных предмета</p><div class="price">Бесплатно</div><button class="action" disabled>Скоро</button></div>
-  <div class="card"><div class="art">🎁</div><h3>Стартовый</h3><p class="muted">Подарок новичку</p><div class="price">Бесплатно</div><button class="action" disabled>Скоро</button></div>
-  <div class="card"><div class="art">🥈</div><h3>Серебряный</h3><p class="muted">Коллекционный набор</p><div class="price">50 HARD COINS</div><button class="action" disabled>Скоро</button></div>
-  <div class="card"><div class="art">👑</div><h3>Королевский</h3><p class="muted">Королевская коллекция</p><div class="price">200 HARD COINS</div><button class="action" disabled>Скоро</button></div>
- </div>
+ <div id="casesGrid" class="grid" style="margin-top:14px"></div>
+<p id="casesStatus" class="notice">Загрузка кейсов...</p>
 </section>
 
 <section id="shop" class="page">
@@ -88,7 +204,7 @@ header{padding:22px 17px;display:flex;justify-content:space-between;align-items:
   <p id="userid" class="muted"></p>
  </div>
  <h2 class="heading">💎 Моя коллекция</h2>
- <p class="muted">Пока коллекция пуста. Полученные предметы появятся здесь.</p>
+ <div id="inventoryList" class="grid"><p class="muted">Загрузка коллекции...</p></div>
  <div class="notice">HARD COINS: награды за активность подключим отдельно.</div>
 </section>
 
@@ -113,6 +229,7 @@ if(user){
  document.getElementById('usernick').textContent='Откройте приложение через Telegram';
 }
 function openPage(id,button){
+ if(id==='profile')loadInventory();
  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
  document.getElementById(id).classList.add('active');
  document.querySelectorAll('.nav button').forEach(b=>b.classList.remove('active'));
