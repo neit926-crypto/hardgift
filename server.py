@@ -51,6 +51,17 @@ def init_db():
             )
         """)
 
+
+        con.execute("""
+            CREATE TABLE IF NOT EXISTS case_cooldowns (
+                telegram_id BIGINT NOT NULL,
+                case_id INTEGER REFERENCES cases(id),
+                last_opened_at TIMESTAMPTZ NOT NULL,
+                PRIMARY KEY (telegram_id, case_id)
+            )
+        """)
+
+
 def telegram_auth():
     token = os.environ.get("BOT_TOKEN")
     if not token:
@@ -125,6 +136,7 @@ def open_free_case():
 
         if not case:
             return jsonify({"error": "Кейс не найден"}), 404
+
         if case["price_coins"] != 0:
             return jsonify({"error": "Этот кейс не бесплатный"}), 403
 
@@ -136,20 +148,64 @@ def open_free_case():
         if not rewards:
             return jsonify({"error": "В кейсе пока нет наград"}), 400
 
+        cooldown = con.execute(
+            """
+            INSERT INTO case_cooldowns
+                (telegram_id, case_id, last_opened_at)
+            VALUES (%s, %s, NOW())
+            ON CONFLICT (telegram_id, case_id)
+            DO UPDATE SET last_opened_at = NOW()
+            WHERE case_cooldowns.last_opened_at <= NOW() - INTERVAL '24 hours'
+            RETURNING last_opened_at
+            """,
+            (g.telegram_id, case["id"])
+        ).fetchone()
+
+        if not cooldown:
+            previous = con.execute(
+                """
+                SELECT last_opened_at FROM case_cooldowns
+                WHERE telegram_id=%s AND case_id=%s
+                """,
+                (g.telegram_id, case["id"])
+            ).fetchone()
+
+            remaining = max(
+                0,
+                86400 - int(
+                    (datetime.now(timezone.utc) - previous["last_opened_at"]).total_seconds()
+                )
+            )
+
+            return jsonify({
+                "success": False,
+                "error": "Кейс пока на перезарядке",
+                "retry_after_seconds": remaining
+            }), 429
+
         reward = random.choice(rewards)
+
         con.execute(
-            """INSERT INTO inventory
-            (telegram_id,item_name,source,acquired_at)
-            VALUES(%s,%s,%s,%s)""",
-            (g.telegram_id, reward["reward_name"], case_name,
-             datetime.now(timezone.utc).isoformat())
+            """
+            INSERT INTO inventory
+                (telegram_id,item_name,source,acquired_at)
+            VALUES(%s,%s,%s,%s)
+            """,
+            (
+                g.telegram_id,
+                reward["reward_name"],
+                case_name,
+                datetime.now(timezone.utc).isoformat()
+            )
         )
 
     return jsonify({
         "success": True,
         "reward": reward["reward_name"],
-        "description": reward["description"]
+        "description": reward["description"],
+        "cooldown_seconds": 86400
     })
+
 
 @app.get("/inventory")
 @require_telegram
