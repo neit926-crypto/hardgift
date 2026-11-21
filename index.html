@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 <title>HARD GIFT</title>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
+<script src="https://unpkg.com/@tonconnect/ui@latest/dist/tonconnect-ui.min.js"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 :root{--bg:#080b18;--panel:#131b33;--purple:#8057ff;--blue:#3978ff;--muted:#929dbb;--border:#293657}
@@ -48,7 +49,7 @@ header{display:flex;align-items:center;justify-content:space-between;padding:19p
 <body>
 <header>
  <div class="logo">HARD <span>GIFT</span></div>
- <div class="wallet">💎 TON · не подключён</div>
+ <div><div id="ton-connect"></div><div id="ton-status" style="font-size:10px;color:#929dbb;margin-top:5px">TON: не подключён</div></div>
 </header>
 
 <div class="container">
@@ -269,7 +270,34 @@ function openPage(id,button){
  if(id==='profile')loadInventory();
  if(id==='cases')loadCases();
 }
-document.addEventListener('DOMContentLoaded',loadCases);
+
+let tonUI;
+function initTonConnect(){
+ if(!window.TON_CONNECT_UI){document.getElementById('ton-status').textContent='TON Connect не загрузился';return;}
+ try{
+  tonUI=new TON_CONNECT_UI.TonConnectUI({
+   manifestUrl:'https://neit926-crypto.github.io/hardgift/tonconnect-manifest.json',
+   buttonRootId:'ton-connect'
+  });
+  tonUI.onStatusChange(wallet=>{
+   const status=document.getElementById('ton-status');
+   if(wallet){
+    const a=wallet.account.address;
+    status.textContent='Подключён: '+a.slice(0,6)+'...'+a.slice(-6);
+   }else{
+    status.textContent='TON: не подключён';
+   }
+  });
+ }catch(e){
+  document.getElementById('ton-status').textContent='Ошибка TON Connect';
+  console.error(e);
+ }
+}
+document.addEventListener('DOMContentLoaded',()=>{
+ loadCases();
+ initTonConnect();
+});
+
 </script>
 </body>
 </html>
