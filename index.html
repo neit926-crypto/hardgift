@@ -343,12 +343,34 @@ header{
 .hg-bottom-banner button{width:40px;height:40px;border:0;border-radius:12px;color:white;font-size:22px;background:linear-gradient(120deg,#8152ff,#287cff)}
 @media(max-width:360px){.hg-welcome{padding:16px}.hg-cube{font-size:60px}.hg-gift-art{height:110px;font-size:52px}}
 
+/* HARD GIFT ONLINE HEADER */
+
+.hg-header{gap:8px;padding:14px 13px;background:linear-gradient(110deg,#0c1228,#171438 60%,#101b37);border-bottom:1px solid #344879;box-shadow:0 5px 25px #0005}
+.hg-brand{display:flex;align-items:center;gap:10px;min-width:0}
+.hg-brand .logo{font-size:20px;white-space:nowrap}
+.hg-online{display:flex;align-items:center;gap:5px;padding:6px 8px;border:1px solid #285c70;border-radius:20px;background:#102b38;color:#8df5d0;font-size:9px;font-weight:800;white-space:nowrap;box-shadow:0 0 12px #21d6a522}
+.hg-online i{width:7px;height:7px;border-radius:50%;background:#39e6a2;box-shadow:0 0 8px #39e6a2;display:block}
+.hg-header-right{display:flex;align-items:center;gap:8px;min-width:0}
+.hg-profile-button{width:34px;height:34px;flex-shrink:0;border:1px solid #5365a1;border-radius:11px;background:#202c50;color:#d9dfff;font-size:21px}
+.hg-ton{min-width:0}
+.hg-ton #ton-connect{display:flex;justify-content:flex-end}
+@media(max-width:380px){.hg-brand{gap:6px}.hg-brand .logo{font-size:17px}.hg-online{font-size:8px;padding:5px 6px}.hg-header{padding:12px 9px}.hg-header-right{gap:5px}.hg-profile-button{width:30px;height:30px}}
+
 </style>
 </head>
 <body>
-<header>
- <div class="logo">HARD <span>GIFT</span></div>
- <div><div id="ton-connect"></div><div id="ton-status" style="font-size:10px;color:#929dbb;margin-top:5px">TON: не подключён</div></div>
+<header class="hg-header">
+ <div class="hg-brand">
+  <div class="logo">HARD <span>GIFT</span></div>
+  <div class="hg-online"><i></i><span id="online-count">… ONLINE</span></div>
+ </div>
+ <div class="hg-header-right">
+  <button class="hg-profile-button" onclick="openPage('profile')" aria-label="Профиль">♙</button>
+  <div class="hg-ton">
+   <div id="ton-connect"></div>
+   <div id="ton-status" style="font-size:10px;color:#929dbb;margin-top:5px">TON: не подключён</div>
+  </div>
+ </div>
 </header>
 
 <div class="container">
@@ -654,9 +676,44 @@ function initTonConnect(){
   console.error(e);
  }
 }
+
+async function updateOnline(){
+ const counter=document.getElementById('online-count');
+ if(!counter)return;
+ try{
+  const response=await fetch(API_URL+'/online/count',{cache:'no-store'});
+  if(!response.ok)throw new Error('Online count unavailable');
+  const data=await response.json();
+  counter.textContent=Number(data.count||0)+' ONLINE';
+ }catch(e){
+  counter.textContent='ONLINE';
+ }
+}
+
+async function sendOnlineHeartbeat(){
+ const tg=window.Telegram?.WebApp;
+ if(!tg?.initData || document.visibilityState==='hidden')return;
+ try{
+  await fetch(API_URL+'/online/heartbeat',{
+   method:'POST',
+   headers:{'X-Telegram-Init-Data':tg.initData}
+  });
+ }catch(e){
+  console.warn('Online heartbeat:',e);
+ }
+ updateOnline();
+}
+
 document.addEventListener('DOMContentLoaded',()=>{
  loadCases();
  initTonConnect();
+ updateOnline();
+ sendOnlineHeartbeat();
+ setInterval(sendOnlineHeartbeat,30000);
+ setInterval(updateOnline,20000);
+ document.addEventListener('visibilitychange',()=>{
+  if(document.visibilityState==='visible')sendOnlineHeartbeat();
+ });
 });
 
 </script>

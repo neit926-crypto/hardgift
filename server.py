@@ -245,7 +245,40 @@ def inventory():
         ).fetchall()
     return jsonify([dict(r) for r in rows])
 
+
+def init_online_db():
+    with db() as con:
+        con.execute("""
+            CREATE TABLE IF NOT EXISTS online_sessions (
+                telegram_id BIGINT PRIMARY KEY,
+                last_seen TIMESTAMPTZ NOT NULL
+            )
+        """)
+
+@app.post("/online/heartbeat")
+@require_telegram
+def online_heartbeat():
+    with db() as con:
+        con.execute("""
+            INSERT INTO online_sessions (telegram_id, last_seen)
+            VALUES (%s, NOW())
+            ON CONFLICT (telegram_id)
+            DO UPDATE SET last_seen = NOW()
+        """, (g.telegram_id,))
+    return jsonify({"success": True})
+
+@app.get("/online/count")
+def online_count():
+    with db() as con:
+        row = con.execute("""
+            SELECT COUNT(*) AS total
+            FROM online_sessions
+            WHERE last_seen >= NOW() - INTERVAL '90 seconds'
+        """).fetchone()
+    return jsonify({"count": row["total"]})
+
 init_db()
+init_online_db()
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 5000)))
