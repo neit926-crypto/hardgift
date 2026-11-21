@@ -44,6 +44,103 @@ header{display:flex;align-items:center;justify-content:space-between;padding:19p
 .nav button span{display:block;font-size:21px}
 .nav button.active{color:#a994ff}
 .empty{grid-column:1/-1;text-align:center;padding:25px;color:var(--muted);font-size:13px}
+
+/* HARD GIFT CASE REDESIGN */
+#casesGrid .card{
+ background:linear-gradient(145deg,#202b50,#11182e 65%,#191536);
+ border:1px solid #46558c;
+ border-radius:20px;padding:12px;
+ box-shadow:0 8px 22px #0005;
+ transition:transform .2s,border-color .2s;
+}
+#casesGrid .card:active{transform:scale(.97)}
+#casesGrid .art{
+ height:125px;margin-bottom:13px;
+ background:radial-gradient(circle at 50% 40%,#6653c9,#29295c 48%,#151c36 80%);
+ border:1px solid #6659ad;
+ font-size:62px;
+}
+#casesGrid .card h3{font-size:16px;min-height:21px}
+#casesGrid .price{background:#29234f;padding:8px;border-radius:9px}
+#casesGrid .action{
+ background:linear-gradient(110deg,#8057ff,#426eff);
+ border:0;border-radius:12px;padding:13px;
+ box-shadow:0 4px 15px #674cff55;
+}
+#casesGrid .action:disabled{background:#303955;box-shadow:none}
+.case-modal{
+ position:fixed;inset:0;background:#050817eF;
+ display:none;align-items:center;justify-content:center;
+ padding:22px;z-index:100;
+}
+.case-modal.show{display:flex}
+.case-modal-box{
+ width:100%;max-width:360px;text-align:center;
+ padding:25px 20px;border-radius:25px;
+ background:linear-gradient(145deg,#252b57,#11182f);
+ border:1px solid #7764d5;
+ box-shadow:0 0 55px #7356ff55;
+ animation:modalIn .35s ease;
+}
+.case-modal-art{
+ width:150px;height:150px;margin:15px auto;
+ display:flex;align-items:center;justify-content:center;
+ font-size:83px;border-radius:30px;
+ background:radial-gradient(circle,#6654bd,#242750 70%);
+ animation:giftReveal 1s ease both;
+}
+.case-modal-box h2{font-size:22px}
+.case-modal-box p{color:#bdc6e5;font-size:13px;line-height:1.5;margin-top:9px}
+.case-modal-box button{
+ width:100%;padding:14px;margin-top:20px;border:0;
+ border-radius:13px;color:white;font-weight:bold;
+ background:linear-gradient(100deg,#8057ff,#3978ff);
+}
+@keyframes modalIn{from{opacity:0;transform:scale(.88)}to{opacity:1;transform:scale(1)}}
+@keyframes giftReveal{
+ 0%{transform:scale(.35) rotate(-15deg);opacity:0}
+ 65%{transform:scale(1.13) rotate(5deg);opacity:1}
+ 100%{transform:scale(1) rotate(0)}
+}
+
+
+/* HARD GIFT ROULETTE */
+.roulette{
+ position:relative;width:100%;height:116px;
+ overflow:hidden;border-radius:16px;margin:20px 0;
+ background:linear-gradient(90deg,#151b35,#292453,#151b35);
+ border:1px solid #6253a8;
+}
+.roulette:before,.roulette:after{
+ content:"";position:absolute;top:0;bottom:0;width:35px;z-index:2;
+ pointer-events:none;
+}
+.roulette:before{left:0;background:linear-gradient(90deg,#151b35,transparent)}
+.roulette:after{right:0;background:linear-gradient(270deg,#151b35,transparent)}
+.roulette-marker{
+ position:absolute;z-index:3;left:50%;top:0;bottom:0;
+ width:3px;background:#b9a4ff;
+ box-shadow:0 0 12px #a98aff;
+ transform:translateX(-50%);
+}
+.roulette-track{
+ position:absolute;left:0;top:9px;height:96px;
+ display:flex;gap:9px;align-items:center;
+ will-change:transform;
+}
+.roulette-item{
+ flex:0 0 86px;height:88px;border-radius:13px;
+ display:flex;align-items:center;justify-content:center;
+ font-size:43px;
+ background:linear-gradient(145deg,#34366c,#202344);
+ border:1px solid #55528f;
+}
+.roulette-item.winner{
+ background:linear-gradient(145deg,#7555d5,#303b80);
+ border:2px solid #c4aaff;
+ box-shadow:0 0 20px #926cff99;
+}
+
 </style>
 </head>
 <body>
@@ -117,6 +214,21 @@ header{display:flex;align-items:center;justify-content:space-between;padding:19p
  <div id="inventoryList" class="grid"><p class="muted">Загрузка коллекции...</p></div>
  <div class="notice">Твоя коллекция подарков HARD GIFT.</div>
 </section>
+</div>
+
+
+<div id="caseModal" class="case-modal">
+ <div class="case-modal-box">
+  <div style="font-size:12px;color:#b9aaff;letter-spacing:2px">HARD GIFT</div>
+  <h2>ТВОЙ ПОДАРОК!</h2>
+  <div class="roulette">
+   <div class="roulette-marker"></div>
+   <div id="rouletteTrack" class="roulette-track"></div>
+  </div>
+  <h2 id="caseReward">Подарок</h2>
+  <p id="caseRewardDescription"></p>
+  <button onclick="closeCaseModal()">Забрать подарок</button>
+ </div>
 </div>
 
 <nav class="nav">
@@ -230,11 +342,48 @@ async function openCase(name,button){
   }
   if(!response.ok)throw new Error(result.error||'Не удалось открыть кейс');
   startCaseCooldown(button,button._caseTimer,result.cooldown_seconds||86400);
-  alert('🎁 Тебе выпало: '+result.reward+'\n'+result.description);
+  showCaseModal(result.reward,result.description);
   await loadInventory();
  }catch(error){
   alert(error.message);button.disabled=false;button.textContent='Открыть';
  }
+}
+
+
+
+async function showCaseModal(reward,description){
+ const modal=document.getElementById('caseModal');
+ const track=document.getElementById('rouletteTrack');
+ const emojis=['🎁','🧸','🌹','💎','🌙','🎀','⭐','👑'];
+ const winnerIndex=16;
+ track.replaceChildren();
+ track.style.transition='none';
+ track.style.transform='translateX(0px)';
+
+ for(let i=0;i<25;i++){
+  const item=document.createElement('div');
+  item.className='roulette-item';
+  item.textContent=i===winnerIndex?'🎁':emojis[Math.floor(Math.random()*emojis.length)];
+  if(i===winnerIndex)item.classList.add('winner');
+  track.append(item);
+ }
+
+ document.getElementById('caseReward').textContent=reward||'Подарок';
+ document.getElementById('caseRewardDescription').textContent=description||'Новая награда в твоей коллекции!';
+ modal.classList.add('show');
+
+ await new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)));
+
+ const card=track.children[winnerIndex];
+ const viewport=track.parentElement;
+ const distance=card.offsetLeft+card.offsetWidth/2-viewport.clientWidth/2;
+
+ track.style.transition='transform 5s cubic-bezier(.08,.75,.12,1)';
+ track.style.transform=`translateX(-${distance}px)`;
+}
+
+function closeCaseModal(){
+ document.getElementById('caseModal').classList.remove('show');
 }
 
 async function loadInventory(){
