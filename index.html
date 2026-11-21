@@ -313,6 +313,36 @@ header{
  padding:12px;
 }
 
+
+/* HARD GIFT HOMEPAGE REBUILD */
+.hg-welcome{display:flex;align-items:center;justify-content:space-between;min-height:155px;padding:22px;margin:8px 0 14px;border:1px solid #527fe9;border-radius:23px;background:radial-gradient(circle at 85% 45%,#5140a6,transparent 36%),linear-gradient(125deg,#172d65,#17163d);box-shadow:0 10px 30px #145bff30}
+.hg-welcome small,.hg-section-title small,.hg-bottom-banner small{color:#8db7ff;font-size:10px;letter-spacing:3px;font-weight:bold}
+.hg-welcome h1{font-size:30px;letter-spacing:2px;margin:8px 0}
+.hg-welcome h1 span{color:#7eaaff;text-shadow:0 0 17px #428cff}
+.hg-welcome p{font-size:12px;color:#b7c9f4}
+.hg-cube{font-size:76px;filter:drop-shadow(0 0 18px #779eff)}
+.hg-actions{display:flex;gap:10px;margin:12px 0 25px}
+.hg-main-button{flex:1;border:1px solid #8aa8ff;border-radius:13px;padding:15px;color:white;font-weight:bold;background:linear-gradient(100deg,#754cff,#267dff)}
+.hg-profile-button{width:52px;border:1px solid #456fc0;border-radius:13px;background:#192650;color:white;font-size:20px}
+.hg-section-title{display:flex;justify-content:space-between;align-items:end;margin-bottom:13px}
+.hg-section-title h2{font-size:21px;letter-spacing:2px;margin-top:4px}
+.hg-section-title>span{font-size:10px;color:#8ba9e8}
+.hg-gifts{grid-template-columns:repeat(2,minmax(0,1fr));gap:11px}
+.hg-gift{padding:9px!important;border-radius:17px!important}
+.hg-gift-art{height:130px;border-radius:13px;display:flex;align-items:center;justify-content:center;position:relative;font-size:62px;text-shadow:0 7px 16px #0009}
+.hg-gift-art i{position:absolute;left:7px;top:7px;font-size:8px;font-style:normal;letter-spacing:1px;padding:5px 7px;border-radius:7px;background:#101a38cc;color:#d8e5ff}
+.hg-gift-art.bear{background:radial-gradient(circle,#bd945a,#664b65 55%,#17234b)}
+.hg-gift-art.rose{background:radial-gradient(circle,#a64d83,#47275e 55%,#172044)}
+.hg-gift-art.crystal{background:radial-gradient(circle,#5d9fe3,#34427f 55%,#172044)}
+.hg-gift-art.moon{background:radial-gradient(circle,#8874d4,#3d326e 55%,#172044)}
+.hg-gift h3{font-size:13px;margin:10px 2px 5px;min-height:30px}
+.hg-gift p{font-size:10px;color:#9fb3dc;margin:0 2px 9px}
+.hg-gift>b{display:block;border-top:1px solid #40578b;padding:9px 2px 2px;font-size:10px;color:#c6d8ff}
+.hg-bottom-banner{display:flex;align-items:center;justify-content:space-between;margin-top:20px;padding:16px;border:1px solid #4b6ec0;border-radius:17px;background:linear-gradient(110deg,#202d64,#24194e)}
+.hg-bottom-banner h3{font-size:12px;margin-top:7px}
+.hg-bottom-banner button{width:40px;height:40px;border:0;border-radius:12px;color:white;font-size:22px;background:linear-gradient(120deg,#8152ff,#287cff)}
+@media(max-width:360px){.hg-welcome{padding:16px}.hg-cube{font-size:60px}.hg-gift-art{height:110px;font-size:52px}}
+
 </style>
 </head>
 <body>
@@ -323,19 +353,29 @@ header{
 
 <div class="container">
 <section id="home" class="page active">
- <div class="hero">
-  <div class="hero-art">🎁</div>
-  <h1>ТВОЙ МИР ПОДАРКОВ</h1>
-  <p>Открывай бесплатные кейсы, собирай коллекцию и следи за новыми подарками в HARD GIFT.</p>
-  <button class="primary" onclick="openPage('cases')">🎁 Смотреть кейсы</button>
+ <div class="hg-welcome">
+  <div>
+   <small>WELCOME TO</small>
+   <h1>HARD <span>GIFT</span></h1>
+   <p>Твоя коллекция цифровых подарков</p>
+  </div>
+  <div class="hg-cube">🎁</div>
  </div>
- <h2 class="heading">Популярные подарки</h2>
- <div class="grid">
-  <div class="card"><div class="art">🧸</div><h3>Золотой мишка</h3><p class="muted">Красивый подарок</p><div class="price">⭐ 100 Stars</div><span class="tag">Редкий</span></div>
-  <div class="card"><div class="art">🌹</div><h3>Тёмная роза</h3><p class="muted">Коллекционный предмет</p><div class="price">Скоро</div><span class="tag">Легендарный</span></div>
-  <div class="card"><div class="art">💎</div><h3>Ночной кристалл</h3><p class="muted">Коллекционный предмет</p><div class="price">Скоро</div><span class="tag">Редкий</span></div>
-  <div class="card"><div class="art">🌙</div><h3>Чёрная луна</h3><p class="muted">Коллекционный предмет</p><div class="price">Бесплатно</div><span class="tag">Эпический</span></div>
+ <div class="hg-actions">
+  <button class="hg-main-button" onclick="openPage('cases')">ОТКРЫТЬ КЕЙСЫ　→</button>
+  <button class="hg-profile-button" onclick="openPage('profile')">👤</button>
  </div>
+ <div class="hg-section-title">
+  <div><small>ТВОЯ КОЛЛЕКЦИЯ</small><h2>NFT GIFTS</h2></div>
+  <span>04 ITEMS</span>
+ </div>
+ <div class="grid hg-gifts">
+  <div class="card hg-gift"><div class="hg-gift-art bear">🧸<i>RARE</i></div><h3>Золотой мишка</h3><p>Красивый подарок</p><b>⭐ 100 STARS</b></div>
+  <div class="card hg-gift"><div class="hg-gift-art rose">🌹<i>LEGENDARY</i></div><h3>Тёмная роза</h3><p>Коллекционный предмет</p><b>SOON</b></div>
+  <div class="card hg-gift"><div class="hg-gift-art crystal">💎<i>RARE</i></div><h3>Ночной кристалл</h3><p>Коллекционный предмет</p><b>SOON</b></div>
+  <div class="card hg-gift"><div class="hg-gift-art moon">🌙<i>EPIC</i></div><h3>Чёрная луна</h3><p>Коллекционный предмет</p><b>FREE</b></div>
+ </div>
+ <div class="hg-bottom-banner"><div><small>HARD GIFT CASES</small><h3>ТВОЙ СЛЕДУЮЩИЙ ПОДАРОК ЖДЁТ</h3></div><button onclick="openPage('cases')">→</button></div>
 </section>
 
 <section id="games" class="page">
