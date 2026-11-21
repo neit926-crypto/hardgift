@@ -141,6 +141,178 @@ header{display:flex;align-items:center;justify-content:space-between;padding:19p
  box-shadow:0 0 20px #926cff99;
 }
 
+
+/* HARD GIFT NEW NEON DESIGN */
+:root{
+ --bg:#080b1c;
+ --panel:#111b3a;
+ --purple:#9b55ff;
+ --blue:#258cff;
+ --muted:#a5b9e8;
+ --border:#315ca8;
+}
+body{
+ background:
+ radial-gradient(ellipse at 15% 0%,#203b83 0%,transparent 38%),
+ radial-gradient(ellipse at 90% 25%,#351c70 0%,transparent 35%),
+ #080b1c;
+}
+header{
+ background:linear-gradient(100deg,#101b3b,#11132d);
+ border-bottom:1px solid #315ca8;
+ box-shadow:0 5px 25px #176aff22;
+}
+.logo{letter-spacing:2px;text-shadow:0 0 15px #438cff88}
+.container{max-width:680px}
+.heading{font-size:21px;font-weight:800}
+.subheading{color:#9fb5e8}
+.hero{
+ background:linear-gradient(145deg,#182e68,#22205b 55%,#111a3c);
+ border:1px solid #477ee9;
+ box-shadow:0 0 28px #287cff33,inset 0 0 25px #477aff18;
+ border-radius:24px;
+}
+.hero-art{
+ font-size:90px;
+ filter:drop-shadow(0 0 18px #5d9dff);
+}
+.card{
+ background:linear-gradient(145deg,#172c59,#111a39 65%,#21164b);
+ border:1px solid #3768b8;
+ border-radius:19px;
+ box-shadow:0 8px 22px #0005,inset 0 0 18px #428aff12;
+}
+.art{
+ background:radial-gradient(circle at 50% 35%,#456ac5,#1b2c5b 60%,#101a37);
+ border:1px solid #4776cf;
+ box-shadow:inset 0 0 22px #70a5ff22,0 0 13px #287cff22;
+}
+.price{
+ color:#d0b4ff;
+ background:linear-gradient(90deg,#35216c,#252b65);
+ border:1px solid #6346a7;
+ border-radius:10px;
+ padding:8px;
+}
+.tag{
+ background:linear-gradient(90deg,#244e9b,#56338e);
+ color:#e1eaff;
+ border:1px solid #557ed0;
+}
+.primary,.action{
+ background:linear-gradient(105deg,#874cff,#287eff);
+ border:1px solid #8a83ff;
+ box-shadow:0 4px 18px #5b55ff55;
+}
+.nav{
+ background:linear-gradient(90deg,#0c1530,#151333);
+ border-top:1px solid #315ca8;
+ box-shadow:0 -5px 25px #0008;
+}
+.nav button.active{color:#75aaff;text-shadow:0 0 12px #438cff}
+#home .grid{
+ grid-template-columns:repeat(3,minmax(0,1fr));
+ gap:9px;
+}
+#home .card{padding:9px}
+#home .art{height:105px;font-size:43px}
+#home .card h3{font-size:12px}
+#home .muted{font-size:10px}
+#home .price{font-size:10px;padding:6px}
+@media(max-width:360px){
+ #home .grid{gap:6px}
+ #home .art{height:85px;font-size:36px}
+ #home .card{padding:7px}
+}
+
+
+/* HARD GIFT NFT CARDS */
+#home .card{
+ position:relative;
+ padding:8px;
+ overflow:hidden;
+ border-radius:16px;
+ background:linear-gradient(145deg,#1b3973,#101b3c 60%,#25194d);
+ border:1px solid #477edc;
+ box-shadow:0 5px 18px #176bff30,inset 0 0 18px #629aff12;
+}
+#home .art{
+ position:relative;
+ overflow:hidden;
+ height:112px;
+ border-radius:12px;
+ display:flex;
+ align-items:center;
+ justify-content:center;
+ background:radial-gradient(ellipse at 50% 42%,#668ee9,#263e79 48%,#111d40 85%);
+ border:1px solid #6395f4;
+ font-size:49px;
+ filter:none;
+}
+#home .art:before{
+ content:"";
+ position:absolute;
+ width:85px;
+ height:85px;
+ border-radius:50%;
+ background:#8dbbff33;
+ filter:blur(20px);
+}
+#home .art{
+ text-shadow:0 5px 12px #0009,0 0 18px #a5c8ff99;
+}
+#home .card:nth-child(2n) .art{
+ background:radial-gradient(ellipse at 50% 42%,#a47ae9,#47347f 50%,#171b43 85%);
+ border-color:#a27bff;
+}
+#home .card:nth-child(3n) .art{
+ background:radial-gradient(ellipse at 50% 42%,#e2b86b,#77502d 50%,#29203d 85%);
+ border-color:#e6bd72;
+}
+#home .tag{
+ display:inline-block;
+ margin-top:7px;
+ font-size:9px;
+ padding:4px 7px;
+}
+#home .card h3{
+ min-height:29px;
+ margin-top:5px;
+}
+
+
+/* HARD GIFT CASE TILES */
+#casesGrid{
+ grid-template-columns:repeat(2,minmax(0,1fr));
+ gap:12px;
+}
+#casesGrid .card{
+ padding:11px;
+ border-radius:20px;
+ background:linear-gradient(145deg,#1c3975,#111a3b 65%,#28194f);
+ border:1px solid #5688e8;
+ box-shadow:0 7px 22px #176bff35,inset 0 0 18px #629aff12;
+}
+#casesGrid .art{
+ height:145px;
+ border-radius:15px;
+ font-size:68px;
+ background:radial-gradient(ellipse at 50% 40%,#657fe0,#30316f 52%,#111b3a 88%);
+ border:1px solid #7199ff;
+ box-shadow:inset 0 0 25px #8cb5ff30,0 0 15px #3978ff30;
+}
+#casesGrid .card h3{
+ font-size:14px;
+ min-height:34px;
+}
+#casesGrid .price{
+ margin-top:8px;
+}
+#casesGrid .action{
+ border-radius:12px;
+ padding:12px;
+}
+
 </style>
 </head>
 <body>
