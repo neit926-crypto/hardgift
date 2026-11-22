@@ -33,22 +33,25 @@ def init_market_db():
         con.execute("ALTER TABLE market_listings ADD COLUMN IF NOT EXISTS image_url TEXT NOT NULL DEFAULT ''")
 
         demos = [
-            ("gift_bear", "Золотой мишка", "Коллекционный Telegram Gift", "gift", "market_demo", 10, "TON"),
-            ("gift_rose", "Тёмная роза", "Коллекционный Telegram Gift", "gift", "gift_store", 15, "TON"),
-            ("nft_crystal", "Crystal", "Демонстрационный TON NFT", "nft", "ton_gallery", 2, "TON"),
-            ("nft_moon", "Black Moon", "Демонстрационный TON NFT", "nft", "dark_collection", 3, "TON"),
-            ("gift_star", "Звёздный подарок", "Коллекционный Telegram Gift", "gift", "star_market", 8, "TON"),
-            ("nft_gem", "Purple Gem", "Демонстрационный TON NFT", "nft", "nft_demo", 1, "TON")
+            ("gift_bear", "Золотой мишка", "Коллекционный Telegram Gift", "gift", "market_demo", 10, "TON", "gift_bear"),
+            ("gift_rose", "Тёмная роза", "Коллекционный Telegram Gift", "gift", "gift_store", 15, "TON", "gift_rose"),
+            ("nft_crystal", "Crystal", "Демонстрационный TON NFT", "nft", "ton_gallery", 2, "TON", "nft_crystal"),
+            ("nft_moon", "Black Moon", "Демонстрационный TON NFT", "nft", "dark_collection", 3, "TON", "nft_moon"),
+            ("gift_star", "Звёздный подарок", "Коллекционный Telegram Gift", "gift", "star_market", 8, "TON", "gift_star"),
+            ("nft_gem", "Purple Gem", "Демонстрационный TON NFT", "nft", "nft_demo", 1, "TON", "nft_gem")
         ]
 
         for item in demos:
             con.execute("""
                 INSERT INTO market_listings
                 (demo_key, title, description, category,
-                 seller_username, price, currency, is_demo)
-                VALUES (%s, %s, %s, %s, %s, %s, %s, TRUE)
-                ON CONFLICT (demo_key) DO NOTHING
-            """, item)
+                 seller_username, price, currency, is_demo, image_url)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, TRUE, %s)
+                ON CONFLICT (demo_key) DO UPDATE
+                SET image_url = EXCLUDED.image_url
+            """, item[:7] + (
+                "https://neit926-crypto.github.io/hardgift/assets/" + item[7] + ".svg",
+            ))
 
 @market.get("/market/categories")
 def market_categories():
