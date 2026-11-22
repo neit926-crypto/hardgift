@@ -6,7 +6,10 @@ from urllib.parse import parse_qsl
 from functools import wraps
 from datetime import datetime, timezone
 
+from market import market, init_market_db
+
 app = Flask(__name__)
+app.register_blueprint(market)
 
 @app.after_request
 def add_cors_headers(response):
@@ -434,6 +437,7 @@ init_db()
 init_balance_db()
 init_profile_db()
 init_online_db()
+init_market_db()
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 5000)))
