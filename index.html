@@ -442,6 +442,7 @@ header{
  <div class="profile">
   <img id="avatar" class="avatar" src="" alt="">
   <h2 id="username">Загрузка...</h2><p id="usernick" class="muted"></p><p id="userid" class="muted"></p>
+  <p id="gameBalance" class="muted">💎 Баланс: 0.0 TON</p>
  </div>
  <h2 class="heading">💎 Моя коллекция</h2>
  <div id="inventoryList" class="grid"><p class="muted">Загрузка коллекции...</p></div>
@@ -619,24 +620,86 @@ function closeCaseModal(){
  document.getElementById('caseModal').classList.remove('show');
 }
 
+async function loadBalance(){
+ const el=document.getElementById('gameBalance');
+ if(!el || !tg?.initData)return;
+ try{
+  const response=await fetch(API_URL+'/balance',{
+   headers:{'X-Telegram-Init-Data':tg.initData}
+  });
+  const data=await response.json();
+  if(!response.ok)throw new Error();
+  el.textContent='💎 Баланс: '+Number(data.balance).toFixed(1)+' TON';
+ }catch(error){
+  el.textContent='💎 Не удалось загрузить баланс';
+ }
+}
+
 async function loadInventory(){
  const list=document.getElementById('inventoryList');
  if(!list)return;
- if(!tg?.initData){list.textContent='Открой приложение через Telegram, чтобы увидеть коллекцию.';return;}
+ if(!tg?.initData){
+  list.textContent='Открой приложение через Telegram, чтобы увидеть коллекцию.';
+  return;
+ }
  try{
-  const response=await fetch(API_URL+'/inventory',{headers:{'X-Telegram-Init-Data':tg.initData}});
+  const response=await fetch(API_URL+'/inventory',{
+   headers:{'X-Telegram-Init-Data':tg.initData}
+  });
   const items=await response.json();
   if(!response.ok)throw new Error();
   list.replaceChildren();
-  if(!items.length){const empty=document.createElement('p');empty.className='empty';empty.textContent='Пока коллекция пуста.';list.append(empty);return;}
+  if(!items.length){
+   const empty=document.createElement('p');
+   empty.className='empty';
+   empty.textContent='Пока коллекция пуста.';
+   list.append(empty);
+   return;
+  }
   items.forEach(item=>{
-   const card=document.createElement('div');card.className='card';
-   const art=document.createElement('div');art.className='art';art.textContent='🎁';
-   const title=document.createElement('h3');title.textContent=item.item_name;
-   const source=document.createElement('p');source.className='muted';source.textContent='Получено из кейса: '+item.source;
-   card.append(art,title,source);list.append(card);
+   const card=document.createElement('div');
+   card.className='card';
+   const art=document.createElement('div');
+   art.className='art';
+   art.textContent='🎁';
+   const title=document.createElement('h3');
+   title.textContent=item.item_name;
+   const source=document.createElement('p');
+   source.className='muted';
+   source.textContent='Получено из кейса: '+item.source;
+   const sell=document.createElement('button');
+   sell.className='sell-button';
+   sell.textContent='Продать за 0.5 TON';
+   sell.addEventListener('click',async()=>{
+    if(!confirm('Продать этот подарок за 0.5 TON?'))return;
+    sell.disabled=true;
+    sell.textContent='Продажа...';
+    try{
+     const result=await fetch(API_URL+'/sell-item',{
+      method:'POST',
+      headers:{
+       'Content-Type':'application/json',
+       'X-Telegram-Init-Data':tg.initData
+      },
+      body:JSON.stringify({item_id:item.id})
+     });
+     const data=await result.json();
+     if(!result.ok)throw new Error(data.error||'Ошибка продажи');
+     alert('Подарок продан! Получено 0.5 TON.');
+     loadInventory();
+     loadBalance();
+    }catch(error){
+     alert(error.message||'Не удалось продать подарок.');
+     sell.disabled=false;
+     sell.textContent='Продать за 0.5 TON';
+    }
+   });
+   card.append(art,title,source,sell);
+   list.append(card);
   });
- }catch(error){list.textContent='Не удалось загрузить коллекцию.';}
+ }catch(error){
+  list.textContent='Не удалось загрузить коллекцию.';
+ }
 }
 
 function openPage(id,button){
@@ -649,7 +712,7 @@ function openPage(id,button){
   const home=[...document.querySelectorAll('.nav button')].find(b=>b.textContent.includes('Главная'));
   if(home)home.classList.add('active');
  }
- if(id==='profile')loadInventory();
+ if(id==='profile'){loadInventory();loadBalance();}
  if(id==='cases')loadCases();
 }
 

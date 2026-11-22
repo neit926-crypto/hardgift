@@ -239,11 +239,69 @@ def open_free_case():
 def inventory():
     with db() as con:
         rows = con.execute(
-            """SELECT item_name,source,acquired_at FROM inventory
+            """SELECT id,item_name,source,acquired_at FROM inventory
             WHERE telegram_id=%s ORDER BY id DESC""",
             (g.telegram_id,)
         ).fetchall()
     return jsonify([dict(r) for r in rows])
+
+
+
+@app.post("/sell-item")
+@require_telegram
+def sell_item():
+    data = request.get_json(silent=True) or {}
+    item_id = data.get("item_id")
+
+    if not isinstance(item_id, int) or isinstance(item_id, bool):
+        return jsonify({"error": "Некорректный предмет"}), 400
+
+    with db() as con:
+        item = con.execute("""
+            DELETE FROM inventory
+            WHERE id=%s AND telegram_id=%s
+            RETURNING item_name
+        """, (item_id, g.telegram_id)).fetchone()
+
+        if not item:
+            return jsonify({"error": "Подарок уже продан или не найден"}), 404
+
+        row = con.execute("""
+            INSERT INTO user_balances (telegram_id, balance)
+            VALUES (%s, 0.5)
+            ON CONFLICT (telegram_id)
+            DO UPDATE SET balance = user_balances.balance + 0.5
+            RETURNING balance
+        """, (g.telegram_id,)).fetchone()
+
+    return jsonify({
+        "success": True,
+        "sold_item": item["item_name"],
+        "earned": 0.5,
+        "balance": float(row["balance"])
+    })
+
+
+
+@app.get("/balance")
+@require_telegram
+def get_balance():
+    with db() as con:
+        row = con.execute(
+            "SELECT balance FROM user_balances WHERE telegram_id=%s",
+            (g.telegram_id,)
+        ).fetchone()
+    return jsonify({"balance": float(row["balance"]) if row else 0.0})
+
+
+def init_balance_db():
+    with db() as con:
+        con.execute("""
+            CREATE TABLE IF NOT EXISTS user_balances (
+                telegram_id BIGINT PRIMARY KEY,
+                balance NUMERIC(18,1) NOT NULL DEFAULT 0
+            )
+        """)
 
 
 def init_online_db():
@@ -278,6 +336,7 @@ def online_count():
     return jsonify({"count": row["total"]})
 
 init_db()
+init_balance_db()
 init_online_db()
 
 if __name__ == "__main__":
