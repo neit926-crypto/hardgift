@@ -103,7 +103,39 @@ def require_telegram(fn):
         user_id, error = telegram_auth()
         if error:
             return jsonify({"error": error}), 401
+
         g.telegram_id = user_id
+
+        fields = dict(parse_qsl(
+            request.headers.get("X-Telegram-Init-Data", ""),
+            keep_blank_values=True
+        ))
+        user = json.loads(fields.get("user", "{}"))
+
+        with db() as con:
+            con.execute("""
+                INSERT INTO user_balances (telegram_id, balance)
+                VALUES (%s, 0)
+                ON CONFLICT (telegram_id) DO NOTHING
+            """, (user_id,))
+
+            con.execute("""
+                INSERT INTO user_profiles
+                    (telegram_id, first_name, last_name, username, photo_url)
+                VALUES (%s, %s, %s, %s, %s)
+                ON CONFLICT (telegram_id) DO UPDATE SET
+                    first_name = EXCLUDED.first_name,
+                    last_name = EXCLUDED.last_name,
+                    username = EXCLUDED.username,
+                    photo_url = EXCLUDED.photo_url
+            """, (
+                user_id,
+                user.get("first_name", ""),
+                user.get("last_name", ""),
+                user.get("username", ""),
+                user.get("photo_url", "")
+            ))
+
         return fn(*args, **kwargs)
     return wrapper
 
@@ -304,6 +336,18 @@ def init_balance_db():
         """)
 
 
+def init_profile_db():
+    with db() as con:
+        con.execute("""
+            CREATE TABLE IF NOT EXISTS user_profiles (
+                telegram_id BIGINT PRIMARY KEY,
+                first_name TEXT DEFAULT '',
+                last_name TEXT DEFAULT '',
+                username TEXT DEFAULT '',
+                photo_url TEXT DEFAULT ''
+            )
+        """)
+
 def init_online_db():
     with db() as con:
         con.execute("""
@@ -312,6 +356,57 @@ def init_online_db():
                 last_seen TIMESTAMPTZ NOT NULL
             )
         """)
+
+@app.get("/rating")
+@require_telegram
+def get_rating():
+    with db() as con:
+        rows = con.execute("""
+            SELECT
+                b.telegram_id,
+                b.balance,
+                COALESCE(p.first_name, '') AS first_name,
+                COALESCE(p.last_name, '') AS last_name,
+                COALESCE(p.username, '') AS username,
+                COALESCE(p.photo_url, '') AS photo_url,
+                ROW_NUMBER() OVER (
+                    ORDER BY b.balance DESC, b.telegram_id ASC
+                ) AS rank
+            FROM user_balances b
+            LEFT JOIN user_profiles p
+                ON p.telegram_id = b.telegram_id
+            ORDER BY b.balance DESC, b.telegram_id ASC
+            LIMIT 100
+        """).fetchall()
+
+        me = con.execute("""
+            SELECT rank
+            FROM (
+                SELECT telegram_id,
+                       ROW_NUMBER() OVER (
+                           ORDER BY balance DESC, telegram_id ASC
+                       ) AS rank
+                FROM user_balances
+            ) ranked
+            WHERE telegram_id = %s
+        """, (g.telegram_id,)).fetchone()
+
+    return jsonify({
+        "users": [
+            {
+                "rank": int(r["rank"]),
+                "telegram_id": r["telegram_id"],
+                "balance": float(r["balance"]),
+                "first_name": r["first_name"],
+                "last_name": r["last_name"],
+                "username": r["username"],
+                "photo_url": r["photo_url"]
+            }
+            for r in rows
+        ],
+        "my_rank": int(me["rank"])
+    })
+
 
 @app.post("/online/heartbeat")
 @require_telegram
@@ -337,6 +432,7 @@ def online_count():
 
 init_db()
 init_balance_db()
+init_profile_db()
 init_online_db()
 
 if __name__ == "__main__":

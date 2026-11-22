@@ -448,6 +448,16 @@ header{
  <div id="inventoryList" class="grid"><p class="muted">Загрузка коллекции...</p></div>
  <div class="notice">Твоя коллекция подарков HARD GIFT.</div>
 </section>
+
+<section id="rating" class="page">
+ <h2 class="heading">🏆 Рейтинг HARD GIFT</h2>
+ <p class="subheading">100 лучших игроков по балансу TON</p>
+ <div id="ratingMyPlace" class="notice">Загрузка твоего места...</div>
+ <div id="ratingList" class="grid">
+  <p class="muted">Загружаем рейтинг...</p>
+ </div>
+</section>
+
 </div>
 
 
@@ -472,6 +482,7 @@ header{
  <button onclick="openPage('earn',this)"><span>💰</span>Заработок</button>
  <button onclick="openPage('bonuses',this)"><span>🎉</span>Бонусы</button>
  <button onclick="openPage('profile',this)"><span>👤</span>Профиль</button>
+ <button onclick="openPage('rating',this)"><span>🏆</span>Рейтинг</button>
 </nav>
 
 <script>
@@ -702,6 +713,107 @@ async function loadInventory(){
  }
 }
 
+
+async function loadRating(){
+ const list=document.getElementById('ratingList');
+ const place=document.getElementById('ratingMyPlace');
+ if(!list || !place)return;
+
+ if(!tg?.initData){
+  list.textContent='Открой HARD GIFT через Telegram.';
+  return;
+ }
+
+ list.textContent='Загружаем рейтинг...';
+
+ try{
+  const response=await fetch(API_URL+'/rating',{
+   headers:{'X-Telegram-Init-Data':tg.initData}
+  });
+  const data=await response.json();
+  if(!response.ok)throw new Error(data.error||'Ошибка загрузки');
+
+  place.textContent='🏆 Твоё место: '+(data.my_rank||'—');
+
+  list.replaceChildren();
+
+  if(!data.users || !data.users.length){
+   list.textContent='Пока рейтинг пуст.';
+   return;
+  }
+
+  data.users.forEach(item=>{
+   const card=document.createElement('div');
+   card.className='card';
+   card.style.display='flex';
+   card.style.alignItems='center';
+   card.style.gap='12px';
+
+   const avatar=document.createElement('div');
+   avatar.style.width='48px';
+   avatar.style.height='48px';
+   avatar.style.borderRadius='50%';
+   avatar.style.flexShrink='0';
+   avatar.style.overflow='hidden';
+   avatar.style.background='linear-gradient(135deg,#7040ff,#168cff)';
+   avatar.style.display='grid';
+   avatar.style.placeItems='center';
+
+   if(item.photo_url){
+    const img=document.createElement('img');
+    img.src=item.photo_url;
+    img.alt='';
+    img.style.width='100%';
+    img.style.height='100%';
+    img.style.objectFit='cover';
+    img.onerror=()=>{img.remove();avatar.textContent='👤';};
+    avatar.append(img);
+   }else{
+    avatar.textContent='👤';
+   }
+
+   const info=document.createElement('div');
+   info.style.flex='1';
+   info.style.minWidth='0';
+
+   const name=document.createElement('div');
+   name.style.fontWeight='700';
+   name.textContent=(
+    [item.first_name,item.last_name].filter(Boolean).join(' ')
+    || (item.username?'@'+item.username:'Игрок')
+   );
+
+   const nick=document.createElement('div');
+   nick.className='muted';
+   nick.style.fontSize='12px';
+   nick.textContent=item.username?'@'+item.username:'HARD GIFT';
+
+   const balance=document.createElement('div');
+   balance.style.fontWeight='700';
+   balance.style.color='#b9aaff';
+   balance.textContent=Number(item.balance).toFixed(1)+' TON';
+
+   const rank=document.createElement('div');
+   rank.style.fontSize='20px';
+   rank.style.fontWeight='800';
+   rank.style.minWidth='35px';
+   rank.style.textAlign='center';
+   rank.textContent=Number(item.rank)<=3
+    ? ['🥇','🥈','🥉'][Number(item.rank)-1]
+    : '#'+item.rank;
+
+   info.append(name,nick,balance);
+   card.append(rank,avatar,info);
+   list.append(card);
+  });
+
+ }catch(error){
+  console.error('Rating:',error);
+  list.textContent='Не удалось загрузить рейтинг. Попробуй позже.';
+  place.textContent='Место пока недоступно';
+ }
+}
+
 function openPage(id,button){
  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
  const page=document.getElementById(id);
@@ -714,6 +826,7 @@ function openPage(id,button){
  }
  if(id==='profile'){loadInventory();loadBalance();}
  if(id==='cases')loadCases();
+ if(id==='rating')loadRating();
 }
 
 let tonUI;
