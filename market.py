@@ -26,11 +26,52 @@ def init_market_db():
                 status TEXT NOT NULL DEFAULT 'active',
                 is_demo BOOLEAN NOT NULL DEFAULT TRUE,
                 created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-                image_url TEXT NOT NULL DEFAULT ''
+                image_url TEXT NOT NULL DEFAULT '',
+                model TEXT NOT NULL DEFAULT '',
+                backdrop TEXT NOT NULL DEFAULT '',
+                symbol TEXT NOT NULL DEFAULT '',
+                rarity TEXT NOT NULL DEFAULT '',
+                nft_number INTEGER
             )
         """)
 
         con.execute("ALTER TABLE market_listings ADD COLUMN IF NOT EXISTS image_url TEXT NOT NULL DEFAULT ''")
+        con.execute("ALTER TABLE market_listings ADD COLUMN IF NOT EXISTS model TEXT NOT NULL DEFAULT ''")
+        con.execute("ALTER TABLE market_listings ADD COLUMN IF NOT EXISTS backdrop TEXT NOT NULL DEFAULT ''")
+        con.execute("ALTER TABLE market_listings ADD COLUMN IF NOT EXISTS symbol TEXT NOT NULL DEFAULT ''")
+        con.execute("ALTER TABLE market_listings ADD COLUMN IF NOT EXISTS rarity TEXT NOT NULL DEFAULT ''")
+        con.execute("ALTER TABLE market_listings ADD COLUMN IF NOT EXISTS nft_number INTEGER")
+
+        con.execute("""
+            UPDATE market_listings SET
+                model = CASE demo_key
+                    WHEN 'nft_crystal' THEN 'Crystal Heart'
+                    WHEN 'nft_moon' THEN 'Midnight Moon'
+                    WHEN 'nft_gem' THEN 'Purple Diamond'
+                    ELSE model END,
+                backdrop = CASE demo_key
+                    WHEN 'nft_crystal' THEN 'Azure Blue'
+                    WHEN 'nft_moon' THEN 'Midnight'
+                    WHEN 'nft_gem' THEN 'Royal Purple'
+                    ELSE backdrop END,
+                symbol = CASE demo_key
+                    WHEN 'nft_crystal' THEN 'Star'
+                    WHEN 'nft_moon' THEN 'Crescent'
+                    WHEN 'nft_gem' THEN 'Diamond'
+                    ELSE symbol END,
+                rarity = CASE demo_key
+                    WHEN 'nft_crystal' THEN 'Rare'
+                    WHEN 'nft_moon' THEN 'Epic'
+                    WHEN 'nft_gem' THEN 'Legendary'
+                    ELSE rarity END,
+                nft_number = CASE demo_key
+                    WHEN 'nft_crystal' THEN 1001
+                    WHEN 'nft_moon' THEN 1002
+                    WHEN 'nft_gem' THEN 1003
+                    ELSE nft_number END
+            WHERE category = 'nft' AND is_demo = TRUE
+        """)
+
 
         demos = [
             ("gift_bear", "Золотой мишка", "Коллекционный Telegram Gift", "gift", "market_demo", 10, "TON", "gift_bear"),
@@ -71,7 +112,7 @@ def market_listings():
     query = """
         SELECT id, title, description, category,
                seller_username, price, currency,
-               is_demo, image_url, created_at
+               is_demo, image_url, model, backdrop, symbol, rarity, nft_number, created_at
         FROM market_listings
         WHERE status = 'active'
     """
@@ -105,7 +146,7 @@ def market_listing_detail(listing_id):
         row = con.execute("""
             SELECT id, title, description, category,
                    seller_username, price, currency,
-                   is_demo, image_url, created_at
+                   is_demo, image_url, model, backdrop, symbol, rarity, nft_number, created_at
             FROM market_listings
             WHERE id = %s AND status = 'active'
         """, (listing_id,)).fetchone()
