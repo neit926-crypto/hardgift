@@ -151,9 +151,21 @@ function safeImageUrl(value) {
 function card(item) {
   const saved = favorites.includes(item.id);
   const type = item.category;
+  const isNft = type === 'nft';
+
+  const traits = isNft ? `
+    <div class="nft-traits">
+      <div class="trait"><span>MODEL</span><b>${escapeHtml(item.model || '—')}</b></div>
+      <div class="trait"><span>BACKDROP</span><b>${escapeHtml(item.backdrop || '—')}</b></div>
+      <div class="trait"><span>SYMBOL</span><b>${escapeHtml(item.symbol || '—')}</b></div>
+      <div class="trait"><span>RARITY</span><b>${escapeHtml(item.rarity || '—')}</b></div>
+    </div>
+    <div class="nft-number">COLLECTIBLE № ${escapeHtml(item.nft_number ?? '—')}</div>
+  ` : '';
+
   return `<article class="card">
     <div class="art">
-      <span class="kind">${type === 'gift' ? 'GIFT' : 'TON NFT'}</span>
+      <span class="kind">${isNft ? 'TON NFT' : 'GIFT'}</span>
       ${safeImageUrl(item.image_url)
       ? `<img class="art-image" src="${escapeHtml(safeImageUrl(item.image_url))}" alt="${escapeHtml(item.title)}" loading="lazy">`
       : (artByName[item.title] || (type === 'gift' ? '🎁' : '💎'))}
@@ -161,8 +173,9 @@ function card(item) {
     </div>
     <h3>${escapeHtml(item.title)}</h3>
     <p class="desc">${escapeHtml(item.description || '')}</p>
-    <div class="price">Тестовый лот</div>
-    <div class="seller">Продавец: @${escapeHtml(item.seller_username)}</div>
+    ${traits}
+    <div class="price">Демо-цена: ${escapeHtml(item.price ?? '—')} ${escapeHtml(item.currency || '')}</div>
+    <div class="seller">Продавец: @${escapeHtml(item.seller_username || 'demo')}</div>
     <div class="demo">ДЕМО-ОБЪЯВЛЕНИЕ · НЕ ДЛЯ ПРОДАЖИ</div>
   </article>`;
 }
@@ -247,5 +260,40 @@ loadListings();
   object-fit: contain;
   display: block;
   border-radius: 14px;
+}
+</style>
+
+<style>
+.nft-traits {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  margin: 14px 0 8px;
+}
+.nft-traits .trait {
+  min-width: 0;
+  padding: 10px;
+  border: 1px solid rgba(255,255,255,.1);
+  border-radius: 12px;
+  background: rgba(255,255,255,.035);
+}
+.nft-traits .trait span {
+  display: block;
+  color: #9292a5;
+  font-size: 10px;
+  letter-spacing: 1px;
+  margin-bottom: 5px;
+}
+.nft-traits .trait b {
+  display: block;
+  color: #fff;
+  font-size: 12px;
+  overflow-wrap: anywhere;
+}
+.nft-number {
+  color: #b69aff;
+  font-size: 11px;
+  letter-spacing: 1px;
+  margin: 10px 0;
 }
 </style>
