@@ -3,894 +3,144 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-<title>HARD GIFT</title>
+<title>HARD GIFT MARKET</title>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
-<script src="https://unpkg.com/@tonconnect/ui@latest/dist/tonconnect-ui.min.js"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
-:root{--bg:#080b18;--panel:#131b33;--purple:#8057ff;--blue:#3978ff;--muted:#929dbb;--border:#293657}
-body{background:radial-gradient(ellipse at top,#17234b,#080b18 65%);color:white;font-family:Arial,sans-serif;padding-bottom:95px;min-height:100vh}
-button{font-family:inherit;cursor:pointer}
-header{display:flex;align-items:center;justify-content:space-between;padding:19px 17px;border-bottom:1px solid var(--border);background:#0b1020}
-.logo{font-size:23px;font-weight:900;letter-spacing:1.5px}
-.logo span{color:#9274ff}
-.wallet{background:#171f3a;border:1px solid #344675;padding:10px 12px;border-radius:13px;font-size:12px;color:#cbd7ff}
-.container{padding:16px;max-width:650px;margin:auto}
+:root{--bg:#0c0d12;--panel:#15171f;--line:#272a35;--muted:#9295a3;--accent:#a78bfa}
+body{background:var(--bg);color:#fff;font-family:Arial,sans-serif;padding-bottom:85px}
+header{height:65px;padding:0 17px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--line);position:sticky;top:0;background:#0c0d12;z-index:5}
+.logo{font-size:21px;font-weight:900;letter-spacing:1px}
+.logo span{color:var(--accent)}
+.user{font-size:12px;color:var(--muted)}
+main{max-width:700px;margin:auto;padding:18px 14px}
+h1{font-size:25px;margin-bottom:7px}
+.subtitle{color:var(--muted);font-size:13px;margin-bottom:20px}
+.search{width:100%;padding:14px;border-radius:13px;border:1px solid var(--line);background:var(--panel);color:white;font-size:14px;outline:none;margin-bottom:14px}
+.tabs{display:flex;gap:8px;margin-bottom:18px;overflow:auto}
+.tab{border:1px solid var(--line);background:var(--panel);color:#bbb;padding:10px 15px;border-radius:11px;white-space:nowrap}
+.tab.active{background:#30264a;border-color:var(--accent);color:white}
+.section-head{display:flex;justify-content:space-between;align-items:center;margin:20px 0 13px}
+.section-head h2{font-size:18px}
+.count{font-size:11px;color:var(--muted)}
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:11px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:10px;min-width:0}
+.art{height:135px;border-radius:11px;background:linear-gradient(145deg,#29243d,#171923);display:flex;align-items:center;justify-content:center;font-size:58px;position:relative;margin-bottom:11px}
+.kind{position:absolute;left:8px;top:8px;background:#24202f;padding:5px 7px;border-radius:7px;font-size:9px;color:#c9b6ff}
+.fav{position:absolute;right:8px;top:7px;border:0;background:#22232c;color:white;border-radius:50%;width:29px;height:29px;font-size:17px}
+.card h3{font-size:14px;margin-bottom:6px}
+.desc{font-size:11px;color:var(--muted);margin-bottom:10px}
+.price{font-size:13px;font-weight:bold;color:#d5c5ff}
+.seller{font-size:10px;color:var(--muted);margin-top:8px}
+.demo{font-size:9px;color:#d9b66b;margin-top:7px}
+.empty{color:var(--muted);font-size:13px;padding:25px 5px;text-align:center;grid-column:1/-1}
 .page{display:none}.page.active{display:block}
-.hero{background:linear-gradient(135deg,#30266c,#172d64 55%,#111a38);border:1px solid #514b9c;border-radius:22px;padding:20px;margin:5px 0 22px}
-.hero-art{text-align:center;font-size:85px;padding:12px}
-.hero h1{font-size:24px;line-height:1.2;margin:8px 0}
-.hero p{color:#c1c9ed;font-size:13px;line-height:1.5}
-.primary{width:100%;padding:15px;margin-top:16px;border:0;border-radius:13px;color:white;font-size:15px;font-weight:bold;background:linear-gradient(100deg,var(--purple),var(--blue))}
-.heading{font-size:20px;margin:22px 0 14px}
-.subheading{font-size:13px;color:var(--muted);margin-top:-7px;margin-bottom:14px}
-.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
-.card{background:linear-gradient(145deg,#19213e,#10162a);border:1px solid var(--border);border-radius:17px;padding:13px;min-width:0;overflow:hidden}
-.art{height:110px;border-radius:13px;background:radial-gradient(circle,#394a91,#1a2345 70%);display:flex;align-items:center;justify-content:center;font-size:55px;margin-bottom:12px}
-.card h3{font-size:15px;line-height:1.3}
-.muted{font-size:12px;color:var(--muted);margin-top:7px;line-height:1.45}
-.price{font-size:13px;color:#b6a4ff;font-weight:bold;margin-top:10px}
-.tag{display:inline-block;font-size:10px;padding:5px 9px;border-radius:20px;background:#30275d;color:#d5c8ff;margin-top:9px}
-.action{width:100%;padding:11px;border-radius:11px;border:1px solid #5365a1;background:#273b76;color:white;margin-top:12px;font-weight:bold}
-.action:disabled{opacity:.55}
-.notice{background:#151e38;border:1px solid #34446e;color:#b9c6e9;padding:13px;border-radius:13px;font-size:12px;line-height:1.5;margin-top:14px}
-.profile{background:linear-gradient(145deg,#1b2547,#11182e);border:1px solid var(--border);border-radius:18px;text-align:center;padding:24px}
-.avatar{width:78px;height:78px;border-radius:50%;border:2px solid #8c76ff;object-fit:cover;background:#273253;margin-bottom:12px}
-.feature{display:flex;align-items:center;gap:13px;padding:15px;background:var(--panel);border:1px solid var(--border);border-radius:14px;margin-bottom:10px}
-.feature-icon{font-size:27px}
-.feature p{font-size:12px;color:var(--muted);margin-top:5px}
-.nav{position:fixed;bottom:0;left:0;width:100%;display:flex;justify-content:space-around;align-items:center;background:#0d1326;border-top:1px solid var(--border);padding:12px 3px 20px;z-index:10}
-.nav button{background:none;border:0;color:#8490b2;font-size:10px;line-height:1.6;min-width:17%}
-.nav button span{display:block;font-size:21px}
-.nav button.active{color:#a994ff}
-.empty{grid-column:1/-1;text-align:center;padding:25px;color:var(--muted);font-size:13px}
-
-/* HARD GIFT CASE REDESIGN */
-#casesGrid .card{
- background:linear-gradient(145deg,#202b50,#11182e 65%,#191536);
- border:1px solid #46558c;
- border-radius:20px;padding:12px;
- box-shadow:0 8px 22px #0005;
- transition:transform .2s,border-color .2s;
-}
-#casesGrid .card:active{transform:scale(.97)}
-#casesGrid .art{
- height:125px;margin-bottom:13px;
- background:radial-gradient(circle at 50% 40%,#6653c9,#29295c 48%,#151c36 80%);
- border:1px solid #6659ad;
- font-size:62px;
-}
-#casesGrid .card h3{font-size:16px;min-height:21px}
-#casesGrid .price{background:#29234f;padding:8px;border-radius:9px}
-#casesGrid .action{
- background:linear-gradient(110deg,#8057ff,#426eff);
- border:0;border-radius:12px;padding:13px;
- box-shadow:0 4px 15px #674cff55;
-}
-#casesGrid .action:disabled{background:#303955;box-shadow:none}
-.case-modal{
- position:fixed;inset:0;background:#050817eF;
- display:none;align-items:center;justify-content:center;
- padding:22px;z-index:100;
-}
-.case-modal.show{display:flex}
-.case-modal-box{
- width:100%;max-width:360px;text-align:center;
- padding:25px 20px;border-radius:25px;
- background:linear-gradient(145deg,#252b57,#11182f);
- border:1px solid #7764d5;
- box-shadow:0 0 55px #7356ff55;
- animation:modalIn .35s ease;
-}
-.case-modal-art{
- width:150px;height:150px;margin:15px auto;
- display:flex;align-items:center;justify-content:center;
- font-size:83px;border-radius:30px;
- background:radial-gradient(circle,#6654bd,#242750 70%);
- animation:giftReveal 1s ease both;
-}
-.case-modal-box h2{font-size:22px}
-.case-modal-box p{color:#bdc6e5;font-size:13px;line-height:1.5;margin-top:9px}
-.case-modal-box button{
- width:100%;padding:14px;margin-top:20px;border:0;
- border-radius:13px;color:white;font-weight:bold;
- background:linear-gradient(100deg,#8057ff,#3978ff);
-}
-@keyframes modalIn{from{opacity:0;transform:scale(.88)}to{opacity:1;transform:scale(1)}}
-@keyframes giftReveal{
- 0%{transform:scale(.35) rotate(-15deg);opacity:0}
- 65%{transform:scale(1.13) rotate(5deg);opacity:1}
- 100%{transform:scale(1) rotate(0)}
-}
-
-
-/* HARD GIFT ROULETTE */
-.roulette{
- position:relative;width:100%;height:116px;
- overflow:hidden;border-radius:16px;margin:20px 0;
- background:linear-gradient(90deg,#151b35,#292453,#151b35);
- border:1px solid #6253a8;
-}
-.roulette:before,.roulette:after{
- content:"";position:absolute;top:0;bottom:0;width:35px;z-index:2;
- pointer-events:none;
-}
-.roulette:before{left:0;background:linear-gradient(90deg,#151b35,transparent)}
-.roulette:after{right:0;background:linear-gradient(270deg,#151b35,transparent)}
-.roulette-marker{
- position:absolute;z-index:3;left:50%;top:0;bottom:0;
- width:3px;background:#b9a4ff;
- box-shadow:0 0 12px #a98aff;
- transform:translateX(-50%);
-}
-.roulette-track{
- position:absolute;left:0;top:9px;height:96px;
- display:flex;gap:9px;align-items:center;
- will-change:transform;
-}
-.roulette-item{
- flex:0 0 86px;height:88px;border-radius:13px;
- display:flex;align-items:center;justify-content:center;
- font-size:43px;
- background:linear-gradient(145deg,#34366c,#202344);
- border:1px solid #55528f;
-}
-.roulette-item.winner{
- background:linear-gradient(145deg,#7555d5,#303b80);
- border:2px solid #c4aaff;
- box-shadow:0 0 20px #926cff99;
-}
-
-
-/* HARD GIFT NEW NEON DESIGN */
-:root{
- --bg:#080b1c;
- --panel:#111b3a;
- --purple:#9b55ff;
- --blue:#258cff;
- --muted:#a5b9e8;
- --border:#315ca8;
-}
-body{
- background:
- radial-gradient(ellipse at 15% 0%,#203b83 0%,transparent 38%),
- radial-gradient(ellipse at 90% 25%,#351c70 0%,transparent 35%),
- #080b1c;
-}
-header{
- background:linear-gradient(100deg,#101b3b,#11132d);
- border-bottom:1px solid #315ca8;
- box-shadow:0 5px 25px #176aff22;
-}
-.logo{letter-spacing:2px;text-shadow:0 0 15px #438cff88}
-.container{max-width:680px}
-.heading{font-size:21px;font-weight:800}
-.subheading{color:#9fb5e8}
-.hero{
- background:linear-gradient(145deg,#182e68,#22205b 55%,#111a3c);
- border:1px solid #477ee9;
- box-shadow:0 0 28px #287cff33,inset 0 0 25px #477aff18;
- border-radius:24px;
-}
-.hero-art{
- font-size:90px;
- filter:drop-shadow(0 0 18px #5d9dff);
-}
-.card{
- background:linear-gradient(145deg,#172c59,#111a39 65%,#21164b);
- border:1px solid #3768b8;
- border-radius:19px;
- box-shadow:0 8px 22px #0005,inset 0 0 18px #428aff12;
-}
-.art{
- background:radial-gradient(circle at 50% 35%,#456ac5,#1b2c5b 60%,#101a37);
- border:1px solid #4776cf;
- box-shadow:inset 0 0 22px #70a5ff22,0 0 13px #287cff22;
-}
-.price{
- color:#d0b4ff;
- background:linear-gradient(90deg,#35216c,#252b65);
- border:1px solid #6346a7;
- border-radius:10px;
- padding:8px;
-}
-.tag{
- background:linear-gradient(90deg,#244e9b,#56338e);
- color:#e1eaff;
- border:1px solid #557ed0;
-}
-.primary,.action{
- background:linear-gradient(105deg,#874cff,#287eff);
- border:1px solid #8a83ff;
- box-shadow:0 4px 18px #5b55ff55;
-}
-.nav{
- background:linear-gradient(90deg,#0c1530,#151333);
- border-top:1px solid #315ca8;
- box-shadow:0 -5px 25px #0008;
-}
-.nav button.active{color:#75aaff;text-shadow:0 0 12px #438cff}
-#home .grid{
- grid-template-columns:repeat(3,minmax(0,1fr));
- gap:9px;
-}
-#home .card{padding:9px}
-#home .art{height:105px;font-size:43px}
-#home .card h3{font-size:12px}
-#home .muted{font-size:10px}
-#home .price{font-size:10px;padding:6px}
-@media(max-width:360px){
- #home .grid{gap:6px}
- #home .art{height:85px;font-size:36px}
- #home .card{padding:7px}
-}
-
-
-/* HARD GIFT NFT CARDS */
-#home .card{
- position:relative;
- padding:8px;
- overflow:hidden;
- border-radius:16px;
- background:linear-gradient(145deg,#1b3973,#101b3c 60%,#25194d);
- border:1px solid #477edc;
- box-shadow:0 5px 18px #176bff30,inset 0 0 18px #629aff12;
-}
-#home .art{
- position:relative;
- overflow:hidden;
- height:112px;
- border-radius:12px;
- display:flex;
- align-items:center;
- justify-content:center;
- background:radial-gradient(ellipse at 50% 42%,#668ee9,#263e79 48%,#111d40 85%);
- border:1px solid #6395f4;
- font-size:49px;
- filter:none;
-}
-#home .art:before{
- content:"";
- position:absolute;
- width:85px;
- height:85px;
- border-radius:50%;
- background:#8dbbff33;
- filter:blur(20px);
-}
-#home .art{
- text-shadow:0 5px 12px #0009,0 0 18px #a5c8ff99;
-}
-#home .card:nth-child(2n) .art{
- background:radial-gradient(ellipse at 50% 42%,#a47ae9,#47347f 50%,#171b43 85%);
- border-color:#a27bff;
-}
-#home .card:nth-child(3n) .art{
- background:radial-gradient(ellipse at 50% 42%,#e2b86b,#77502d 50%,#29203d 85%);
- border-color:#e6bd72;
-}
-#home .tag{
- display:inline-block;
- margin-top:7px;
- font-size:9px;
- padding:4px 7px;
-}
-#home .card h3{
- min-height:29px;
- margin-top:5px;
-}
-
-
-/* HARD GIFT CASE TILES */
-#casesGrid{
- grid-template-columns:repeat(2,minmax(0,1fr));
- gap:12px;
-}
-#casesGrid .card{
- padding:11px;
- border-radius:20px;
- background:linear-gradient(145deg,#1c3975,#111a3b 65%,#28194f);
- border:1px solid #5688e8;
- box-shadow:0 7px 22px #176bff35,inset 0 0 18px #629aff12;
-}
-#casesGrid .art{
- height:145px;
- border-radius:15px;
- font-size:68px;
- background:radial-gradient(ellipse at 50% 40%,#657fe0,#30316f 52%,#111b3a 88%);
- border:1px solid #7199ff;
- box-shadow:inset 0 0 25px #8cb5ff30,0 0 15px #3978ff30;
-}
-#casesGrid .card h3{
- font-size:14px;
- min-height:34px;
-}
-#casesGrid .price{
- margin-top:8px;
-}
-#casesGrid .action{
- border-radius:12px;
- padding:12px;
-}
-
-
-/* HARD GIFT HOMEPAGE REBUILD */
-.hg-welcome{display:flex;align-items:center;justify-content:space-between;min-height:155px;padding:22px;margin:8px 0 14px;border:1px solid #527fe9;border-radius:23px;background:radial-gradient(circle at 85% 45%,#5140a6,transparent 36%),linear-gradient(125deg,#172d65,#17163d);box-shadow:0 10px 30px #145bff30}
-.hg-welcome small,.hg-section-title small,.hg-bottom-banner small{color:#8db7ff;font-size:10px;letter-spacing:3px;font-weight:bold}
-.hg-welcome h1{font-size:30px;letter-spacing:2px;margin:8px 0}
-.hg-welcome h1 span{color:#7eaaff;text-shadow:0 0 17px #428cff}
-.hg-welcome p{font-size:12px;color:#b7c9f4}
-.hg-cube{font-size:76px;filter:drop-shadow(0 0 18px #779eff)}
-.hg-actions{display:flex;gap:10px;margin:12px 0 25px}
-.hg-main-button{flex:1;border:1px solid #8aa8ff;border-radius:13px;padding:15px;color:white;font-weight:bold;background:linear-gradient(100deg,#754cff,#267dff)}
-.hg-profile-button{width:52px;border:1px solid #456fc0;border-radius:13px;background:#192650;color:white;font-size:20px}
-.hg-section-title{display:flex;justify-content:space-between;align-items:end;margin-bottom:13px}
-.hg-section-title h2{font-size:21px;letter-spacing:2px;margin-top:4px}
-.hg-section-title>span{font-size:10px;color:#8ba9e8}
-.hg-gifts{grid-template-columns:repeat(2,minmax(0,1fr));gap:11px}
-.hg-gift{padding:9px!important;border-radius:17px!important}
-.hg-gift-art{height:130px;border-radius:13px;display:flex;align-items:center;justify-content:center;position:relative;font-size:62px;text-shadow:0 7px 16px #0009}
-.hg-gift-art i{position:absolute;left:7px;top:7px;font-size:8px;font-style:normal;letter-spacing:1px;padding:5px 7px;border-radius:7px;background:#101a38cc;color:#d8e5ff}
-.hg-gift-art.bear{background:radial-gradient(circle,#bd945a,#664b65 55%,#17234b)}
-.hg-gift-art.rose{background:radial-gradient(circle,#a64d83,#47275e 55%,#172044)}
-.hg-gift-art.crystal{background:radial-gradient(circle,#5d9fe3,#34427f 55%,#172044)}
-.hg-gift-art.moon{background:radial-gradient(circle,#8874d4,#3d326e 55%,#172044)}
-.hg-gift h3{font-size:13px;margin:10px 2px 5px;min-height:30px}
-.hg-gift p{font-size:10px;color:#9fb3dc;margin:0 2px 9px}
-.hg-gift>b{display:block;border-top:1px solid #40578b;padding:9px 2px 2px;font-size:10px;color:#c6d8ff}
-.hg-bottom-banner{display:flex;align-items:center;justify-content:space-between;margin-top:20px;padding:16px;border:1px solid #4b6ec0;border-radius:17px;background:linear-gradient(110deg,#202d64,#24194e)}
-.hg-bottom-banner h3{font-size:12px;margin-top:7px}
-.hg-bottom-banner button{width:40px;height:40px;border:0;border-radius:12px;color:white;font-size:22px;background:linear-gradient(120deg,#8152ff,#287cff)}
-@media(max-width:360px){.hg-welcome{padding:16px}.hg-cube{font-size:60px}.hg-gift-art{height:110px;font-size:52px}}
-
-/* HARD GIFT ONLINE HEADER */
-
-.hg-header{gap:8px;padding:14px 13px;background:linear-gradient(110deg,#0c1228,#171438 60%,#101b37);border-bottom:1px solid #344879;box-shadow:0 5px 25px #0005}
-.hg-brand{display:flex;align-items:center;gap:10px;min-width:0}
-.hg-brand .logo{font-size:20px;white-space:nowrap}
-.hg-online{display:flex;align-items:center;gap:5px;padding:6px 8px;border:1px solid #285c70;border-radius:20px;background:#102b38;color:#8df5d0;font-size:9px;font-weight:800;white-space:nowrap;box-shadow:0 0 12px #21d6a522}
-.hg-online i{width:7px;height:7px;border-radius:50%;background:#39e6a2;box-shadow:0 0 8px #39e6a2;display:block}
-.hg-header-right{display:flex;align-items:center;gap:8px;min-width:0}
-.hg-profile-button{width:34px;height:34px;flex-shrink:0;border:1px solid #5365a1;border-radius:11px;background:#202c50;color:#d9dfff;font-size:21px}
-.hg-ton{min-width:0}
-.hg-ton #ton-connect{display:flex;justify-content:flex-end}
-@media(max-width:380px){.hg-brand{gap:6px}.hg-brand .logo{font-size:17px}.hg-online{font-size:8px;padding:5px 6px}.hg-header{padding:12px 9px}.hg-header-right{gap:5px}.hg-profile-button{width:30px;height:30px}}
-
+nav{position:fixed;bottom:0;left:0;right:0;background:#111219;border-top:1px solid var(--line);display:flex;justify-content:space-around;padding:10px 4px calc(10px + env(safe-area-inset-bottom));z-index:10}
+nav button{border:0;background:none;color:#858796;font-size:10px;display:flex;flex-direction:column;align-items:center;gap:5px;min-width:60px}
+nav button span{font-size:20px}
+nav button.active{color:var(--accent)}
+.profile{background:var(--panel);border:1px solid var(--line);border-radius:15px;padding:20px;text-align:center}
+.avatar{width:65px;height:65px;border-radius:50%;background:#29243d;margin-bottom:10px;object-fit:cover}
+.notice{padding:13px;background:#211d2b;border:1px solid #45365d;border-radius:12px;color:#c9b6ff;font-size:12px;line-height:1.5;margin-top:18px}
+@media(min-width:550px){.grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
 </style>
 </head>
 <body>
-<header class="hg-header">
- <div class="hg-brand">
-  <div class="logo">HARD <span>GIFT</span></div>
-  <div class="hg-online"><i></i><span id="online-count">… ONLINE</span></div>
- </div>
- <div class="hg-header-right">
-  <div class="hg-ton">
-   <div id="ton-connect"></div>
-   <div id="ton-status" style="font-size:10px;color:#929dbb;margin-top:5px">TON: не подключён</div>
-  </div>
- </div>
+<header>
+ <div class="logo">HARD <span>GIFT</span></div>
+ <div class="user" id="userName">MARKET</div>
 </header>
-
-<div class="container">
-<section id="home" class="page active">
- <div class="hg-welcome">
-  <div>
-   <small>WELCOME TO</small>
-   <h1>HARD <span>GIFT</span></h1>
-   <p>Твоя коллекция цифровых подарков</p>
+<main>
+ <section id="catalog" class="page active">
+  <h1>Маркетплейс</h1>
+  <p class="subtitle">Цифровые подарки и TON NFT</p>
+  <input class="search" id="search" placeholder="Поиск подарков и NFT..." oninput="render()">
+  <div class="tabs">
+   <button class="tab active" onclick="setCategory('all',this)">Все</button>
+   <button class="tab" onclick="setCategory('gift',this)">🎁 Gifts</button>
+   <button class="tab" onclick="setCategory('nft',this)">💎 TON NFT</button>
   </div>
-  <div class="hg-cube">🎁</div>
- </div>
- <div class="hg-actions">
-  <button class="hg-main-button" onclick="openPage('cases')">ОТКРЫТЬ КЕЙСЫ　→</button>
-  <button class="hg-profile-button" onclick="openPage('profile')">👤</button>
- </div>
- <div class="hg-section-title">
-  <div><small>ТВОЯ КОЛЛЕКЦИЯ</small><h2>NFT GIFTS</h2></div>
-  <span>04 ITEMS</span>
- </div>
- <div class="grid hg-gifts">
-  <div class="card hg-gift"><div class="hg-gift-art bear">🧸<i>RARE</i></div><h3>Золотой мишка</h3><p>Красивый подарок</p><b>⭐ 100 STARS</b></div>
-  <div class="card hg-gift"><div class="hg-gift-art rose">🌹<i>LEGENDARY</i></div><h3>Тёмная роза</h3><p>Коллекционный предмет</p><b>SOON</b></div>
-  <div class="card hg-gift"><div class="hg-gift-art crystal">💎<i>RARE</i></div><h3>Ночной кристалл</h3><p>Коллекционный предмет</p><b>SOON</b></div>
-  <div class="card hg-gift"><div class="hg-gift-art moon">🌙<i>EPIC</i></div><h3>Чёрная луна</h3><p>Коллекционный предмет</p><b>FREE</b></div>
- </div>
- <div class="hg-bottom-banner"><div><small>HARD GIFT CASES</small><h3>ТВОЙ СЛЕДУЮЩИЙ ПОДАРОК ЖДЁТ</h3></div><button onclick="openPage('cases')">→</button></div>
-</section>
-
-<section id="games" class="page">
- <h2 class="heading">🎮 Игры</h2><p class="subheading">Развлечения HARD GIFT</p>
- <div class="grid">
-  <div class="card"><div class="art">🎁</div><h3>Бесплатные кейсы</h3><p class="muted">Получай подарки из доступных кейсов.</p><button class="action" onclick="openPage('cases')">Перейти</button></div>
-  <div class="card"><div class="art">🏆</div><h3>Достижения</h3><p class="muted">Система достижений появится позже.</p><span class="tag">Скоро</span></div>
- </div>
-</section>
-
-<section id="cases" class="page">
- <h2 class="heading">🎁 Кейсы</h2>
- <p class="subheading">Выбирай кейс и собирай подарки</p>
- <div class="notice">Бесплатные кейсы можно открывать по таймеру. Ознакомься с описанием наград.</div>
- <div id="casesGrid" class="grid" style="margin-top:14px"></div>
- <p id="casesStatus" class="notice">Загрузка кейсов...</p>
-</section>
-
-<section id="earn" class="page">
- <h2 class="heading">💰 Заработок</h2>
- <p class="subheading">Раздел активности HARD GIFT</p>
- <div class="feature"><div class="feature-icon">📅</div><div><h3>Ежедневная активность</h3><p>Система ежедневных заданий появится позже.</p></div></div>
- <div class="feature"><div class="feature-icon">🎯</div><div><h3>Задания</h3><p>Выполняй задания и получай доступные награды.</p></div></div>
- <div class="notice">Раздел пока находится в разработке.</div>
-</section>
-
-<section id="bonuses" class="page">
- <h2 class="heading">🎉 Бонусы</h2>
- <div class="card"><div class="art">🎊</div><h3>Бонусы HARD GIFT</h3><p class="muted">Здесь будут отображаться доступные акции и бесплатные подарки.</p><span class="tag">Скоро</span></div>
-</section>
-
-<section id="shop" class="page">
- <h2 class="heading">🛍 Магазин</h2><p class="subheading">Коллекционные подарки</p>
- <div class="grid">
-  <div class="card"><div class="art">🧸</div><h3>Золотой мишка</h3><p class="muted">Красивый подарок</p><div class="price">⭐ 100 Stars</div></div>
-  <div class="card"><div class="art">🌹</div><h3>Тёмная роза</h3><p class="muted">Коллекционный предмет</p><div class="price">Скоро</div></div>
- </div>
- <div class="notice">Покупки пока не подключены. Не отправляй деньги на сторонние адреса.</div>
-</section>
-
-<section id="profile" class="page">
- <h2 class="heading">👤 Мой профиль</h2>
- <div class="profile">
-  <img id="avatar" class="avatar" src="" alt="">
-  <h2 id="username">Загрузка...</h2><p id="usernick" class="muted"></p><p id="userid" class="muted"></p>
-  <p id="gameBalance" class="muted">💎 Баланс: 0.0 TON</p>
- </div>
- <h2 class="heading">💎 Моя коллекция</h2>
- <div id="inventoryList" class="grid"><p class="muted">Загрузка коллекции...</p></div>
- <div class="notice">Твоя коллекция подарков HARD GIFT.</div>
-</section>
-
-<section id="rating" class="page">
- <h2 class="heading">🏆 Рейтинг HARD GIFT</h2>
- <p class="subheading">100 лучших игроков по балансу TON</p>
- <div id="ratingMyPlace" class="notice">Загрузка твоего места...</div>
- <div id="ratingList" class="grid">
-  <p class="muted">Загружаем рейтинг...</p>
- </div>
-</section>
-
-</div>
-
-
-<div id="caseModal" class="case-modal">
- <div class="case-modal-box">
-  <div style="font-size:12px;color:#b9aaff;letter-spacing:2px">HARD GIFT</div>
-  <h2>ТВОЙ ПОДАРОК!</h2>
-  <div class="roulette">
-   <div class="roulette-marker"></div>
-   <div id="rouletteTrack" class="roulette-track"></div>
+  <div class="section-head"><h2>Объявления</h2><span class="count" id="count">0 лотов</span></div>
+  <div class="grid" id="list"></div>
+  <div class="notice">Это демонстрационный каталог. Объявления тестовые: покупка, оплата и передача активов не выполняются.</div>
+ </section>
+ <section id="favorites" class="page">
+  <h1>Избранное</h1><p class="subtitle">Сохранённые объявления</p>
+  <div class="grid" id="favoriteList"></div>
+ </section>
+ <section id="profile" class="page">
+  <h1>Профиль</h1><p class="subtitle">Твой аккаунт HARD GIFT</p>
+  <div class="profile">
+   <img class="avatar" id="avatar" alt="">
+   <h2 id="profileName">Гость</h2>
+   <p class="user" id="profileNick">Открой приложение через Telegram</p>
   </div>
-  <h2 id="caseReward">Подарок</h2>
-  <p id="caseRewardDescription"></p>
-  <button onclick="closeCaseModal()">Забрать подарок</button>
- </div>
-</div>
-
-<nav class="nav">
- <button class="active" onclick="openPage('home',this)"><span>⌂</span>Главная</button>
- <button onclick="openPage('games',this)"><span>🎮</span>Игры</button>
- <button onclick="openPage('cases',this)"><span>🎁</span>Кейсы</button>
- <button onclick="openPage('earn',this)"><span>💰</span>Заработок</button>
- <button onclick="openPage('bonuses',this)"><span>🎉</span>Бонусы</button>
- <button onclick="openPage('profile',this)"><span>👤</span>Профиль</button>
- <button onclick="openPage('rating',this)"><span>🏆</span>Рейтинг</button>
+  <div class="notice">Профили продавцов и история объявлений появятся в следующих версиях.</div>
+ </section>
+</main>
+<nav>
+ <button class="active" onclick="page('catalog',this)"><span>⌂</span>Маркет</button>
+ <button onclick="page('favorites',this)"><span>♡</span>Избранное</button>
+ <button onclick="page('profile',this)"><span>👤</span>Профиль</button>
 </nav>
-
 <script>
-const API_URL='https://hardgift.onrender.com';
 const tg=window.Telegram?.WebApp;
 if(tg){tg.ready();tg.expand();}
 const user=tg?.initDataUnsafe?.user;
-
 if(user){
- document.getElementById('username').textContent=[user.first_name,user.last_name].filter(Boolean).join(' ');
- document.getElementById('usernick').textContent=user.username?'@'+user.username:'Username отсутствует';
- document.getElementById('userid').textContent='Telegram ID: '+user.id;
+ const name=[user.first_name,user.last_name].filter(Boolean).join(' ');
+ document.getElementById('userName').textContent=name;
+ document.getElementById('profileName').textContent=name;
+ document.getElementById('profileNick').textContent=user.username?'@'+user.username:'Telegram пользователь';
  if(user.photo_url)document.getElementById('avatar').src=user.photo_url;
-}else{
- document.getElementById('username').textContent='Гость';
- document.getElementById('usernick').textContent='Открой приложение через Telegram';
 }
-
-let cooldownTick=null;
-
-function startCaseCooldown(button,timer,seconds){
- if(!timer)return;
- timer.dataset.remaining=Math.max(0,seconds);
- button.disabled=true;button.textContent='Перезарядка';
- function render(el){
-  const r=Math.max(0,Number(el.dataset.remaining||0));
-  if(r===0){
-   el.textContent='Можно открывать!';
-   const b=el.parentElement.querySelector('button');
-   if(b){b.disabled=false;b.textContent='Открыть';}
-   return;
-  }
-  const h=String(Math.floor(r/3600)).padStart(2,'0');
-  const m=String(Math.floor((r%3600)/60)).padStart(2,'0');
-  const s=String(r%60).padStart(2,'0');
-  el.textContent='Следующее открытие через '+h+':'+m+':'+s;
- }
- render(timer);
- if(!cooldownTick){
-  cooldownTick=setInterval(()=>{
-   document.querySelectorAll('.case-timer').forEach(el=>{
-    let r=Math.max(0,Number(el.dataset.remaining||0));
-    if(r>0)r--;
-    el.dataset.remaining=r;render(el);
-   });
-  },1000);
- }
+const items=[
+ {id:1,name:'Золотой мишка',type:'gift',art:'🧸',desc:'Коллекционный Telegram Gift',price:'Тестовый лот',seller:'market_demo'},
+ {id:2,name:'Тёмная роза',type:'gift',art:'🌹',desc:'Коллекционный Telegram Gift',price:'Тестовый лот',seller:'gift_store'},
+ {id:3,name:'Crystal',type:'nft',art:'💎',desc:'Демонстрационный TON NFT',price:'Тестовый лот',seller:'ton_gallery'},
+ {id:4,name:'Black Moon',type:'nft',art:'🌑',desc:'Демонстрационный TON NFT',price:'Тестовый лот',seller:'dark_collection'},
+ {id:5,name:'Звёздный подарок',type:'gift',art:'🌟',desc:'Коллекционный Telegram Gift',price:'Тестовый лот',seller:'star_market'},
+ {id:6,name:'Purple Gem',type:'nft',art:'🔮',desc:'Демонстрационный TON NFT',price:'Тестовый лот',seller:'nft_demo'}
+];
+let category='all';
+let favorites=JSON.parse(localStorage.getItem('hg_favorites')||'[]');
+function card(item){
+ const saved=favorites.includes(item.id);
+ return `<article class="card">
+  <div class="art"><span class="kind">${item.type==='gift'?'GIFT':'TON NFT'}</span>${item.art}
+   <button class="fav" onclick="toggleFav(${item.id})">${saved?'♥':'♡'}</button>
+  </div>
+  <h3>${item.name}</h3><p class="desc">${item.desc}</p>
+  <div class="price">${item.price}</div>
+  <div class="seller">Продавец: @${item.seller}</div>
+  <div class="demo">ДЕМО-ОБЪЯВЛЕНИЕ</div>
+ </article>`;
 }
-
-async function loadCases(){
- const grid=document.getElementById('casesGrid');
- const status=document.getElementById('casesStatus');
- try{
-  const response=await fetch(API_URL+'/cases');
-  if(!response.ok)throw new Error('Ошибка загрузки кейсов');
-  const cases=await response.json();
-  let cooldowns={};
-  if(tg?.initData){
-   const cd=await fetch(API_URL+'/case-cooldowns',{headers:{'X-Telegram-Init-Data':tg.initData}});
-   if(cd.ok)(await cd.json()).forEach(r=>cooldowns[r.case_name]=r.remaining_seconds);
-  }
-  grid.replaceChildren();
-  if(!cases.length){status.textContent='Пока нет доступных кейсов.';return;}
-  cases.forEach(item=>{
-   const card=document.createElement('div');card.className='card';
-   const art=document.createElement('div');art.className='art';art.textContent='🎁';
-   const title=document.createElement('h3');title.textContent=item.name;
-   const desc=document.createElement('p');desc.className='muted';desc.textContent=item.description;
-   const price=document.createElement('div');price.className='price';
-   price.textContent=item.price_coins===0?'Бесплатно':item.price_coins+' HARD COINS';
-   const timer=document.createElement('p');timer.className='muted case-timer';
-   const button=document.createElement('button');button.className='action';button._caseTimer=timer;
-   if(item.price_coins===0){
-    button.textContent='Открыть';
-    button.addEventListener('click',()=>openCase(item.name,button));
-    const remaining=Number(cooldowns[item.name]||0);
-    if(remaining>0)startCaseCooldown(button,timer,remaining);
-    else timer.textContent='Доступен';
-   }else{button.textContent='Скоро';button.disabled=true;}
-   card.append(art,title,desc,price,timer,button);grid.append(card);
-  });
-  status.textContent='Выбирай доступный бесплатный кейс!';
- }catch(error){
-  console.error(error);
-  status.textContent='Не удалось загрузить кейсы. Попробуй обновить страницу.';
- }
+function render(){
+ const query=document.getElementById('search').value.toLowerCase();
+ const filtered=items.filter(x=>(category==='all'||x.type===category)&&x.name.toLowerCase().includes(query));
+ document.getElementById('list').innerHTML=filtered.length?filtered.map(card).join(''):'<div class="empty">Ничего не найдено</div>';
+ document.getElementById('count').textContent=filtered.length+' лотов';
+ document.getElementById('favoriteList').innerHTML=items.filter(x=>favorites.includes(x.id)).map(card).join('')||'<div class="empty">Пока нет избранных объявлений</div>';
 }
-
-async function openCase(name,button){
- if(!tg?.initData){alert('Открой HARD GIFT через Telegram.');return;}
- button.disabled=true;button.textContent='Открываем...';
- try{
-  const response=await fetch(API_URL+'/open-free-case',{
-   method:'POST',
-   headers:{'Content-Type':'application/json','X-Telegram-Init-Data':tg.initData},
-   body:JSON.stringify({case_name:name})
-  });
-  const result=await response.json();
-  if(response.status===429){
-   startCaseCooldown(button,button._caseTimer,result.retry_after_seconds||1);
-   alert('⏳ Этот кейс ещё на перезарядке!');return;
-  }
-  if(!response.ok)throw new Error(result.error||'Не удалось открыть кейс');
-  startCaseCooldown(button,button._caseTimer,result.cooldown_seconds||86400);
-  showCaseModal(result.reward,result.description);
-  await loadInventory();
- }catch(error){
-  alert(error.message);button.disabled=false;button.textContent='Открыть';
- }
+function setCategory(value,button){
+ category=value;
+ document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));
+ button.classList.add('active');
+ render();
 }
-
-
-
-async function showCaseModal(reward,description){
- const modal=document.getElementById('caseModal');
- const track=document.getElementById('rouletteTrack');
- const emojis=['🎁','🧸','🌹','💎','🌙','🎀','⭐','👑'];
- const winnerIndex=16;
- track.replaceChildren();
- track.style.transition='none';
- track.style.transform='translateX(0px)';
-
- for(let i=0;i<25;i++){
-  const item=document.createElement('div');
-  item.className='roulette-item';
-  item.textContent=i===winnerIndex?'🎁':emojis[Math.floor(Math.random()*emojis.length)];
-  if(i===winnerIndex)item.classList.add('winner');
-  track.append(item);
- }
-
- document.getElementById('caseReward').textContent=reward||'Подарок';
- document.getElementById('caseRewardDescription').textContent=description||'Новая награда в твоей коллекции!';
- modal.classList.add('show');
-
- await new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)));
-
- const card=track.children[winnerIndex];
- const viewport=track.parentElement;
- const distance=card.offsetLeft+card.offsetWidth/2-viewport.clientWidth/2;
-
- track.style.transition='transform 5s cubic-bezier(.08,.75,.12,1)';
- track.style.transform=`translateX(-${distance}px)`;
+function toggleFav(id){
+ favorites=favorites.includes(id)?favorites.filter(x=>x!==id):[...favorites,id];
+ localStorage.setItem('hg_favorites',JSON.stringify(favorites));
+ render();
 }
-
-function closeCaseModal(){
- document.getElementById('caseModal').classList.remove('show');
+function page(id,button){
+ document.querySelectorAll('.page').forEach(x=>x.classList.remove('active'));
+ document.getElementById(id).classList.add('active');
+ document.querySelectorAll('nav button').forEach(x=>x.classList.remove('active'));
+ button.classList.add('active');
 }
-
-async function loadBalance(){
- const el=document.getElementById('gameBalance');
- if(!el || !tg?.initData)return;
- try{
-  const response=await fetch(API_URL+'/balance',{
-   headers:{'X-Telegram-Init-Data':tg.initData}
-  });
-  const data=await response.json();
-  if(!response.ok)throw new Error();
-  el.textContent='💎 Баланс: '+Number(data.balance).toFixed(1)+' TON';
- }catch(error){
-  el.textContent='💎 Не удалось загрузить баланс';
- }
-}
-
-async function loadInventory(){
- const list=document.getElementById('inventoryList');
- if(!list)return;
- if(!tg?.initData){
-  list.textContent='Открой приложение через Telegram, чтобы увидеть коллекцию.';
-  return;
- }
- try{
-  const response=await fetch(API_URL+'/inventory',{
-   headers:{'X-Telegram-Init-Data':tg.initData}
-  });
-  const items=await response.json();
-  if(!response.ok)throw new Error();
-  list.replaceChildren();
-  if(!items.length){
-   const empty=document.createElement('p');
-   empty.className='empty';
-   empty.textContent='Пока коллекция пуста.';
-   list.append(empty);
-   return;
-  }
-  items.forEach(item=>{
-   const card=document.createElement('div');
-   card.className='card';
-   const art=document.createElement('div');
-   art.className='art';
-   art.textContent='🎁';
-   const title=document.createElement('h3');
-   title.textContent=item.item_name;
-   const source=document.createElement('p');
-   source.className='muted';
-   source.textContent='Получено из кейса: '+item.source;
-   const sell=document.createElement('button');
-   sell.className='sell-button';
-   sell.textContent='Продать за 0.5 TON';
-   sell.addEventListener('click',async()=>{
-    if(!confirm('Продать этот подарок за 0.5 TON?'))return;
-    sell.disabled=true;
-    sell.textContent='Продажа...';
-    try{
-     const result=await fetch(API_URL+'/sell-item',{
-      method:'POST',
-      headers:{
-       'Content-Type':'application/json',
-       'X-Telegram-Init-Data':tg.initData
-      },
-      body:JSON.stringify({item_id:item.id})
-     });
-     const data=await result.json();
-     if(!result.ok)throw new Error(data.error||'Ошибка продажи');
-     alert('Подарок продан! Получено 0.5 TON.');
-     loadInventory();
-     loadBalance();
-    }catch(error){
-     alert(error.message||'Не удалось продать подарок.');
-     sell.disabled=false;
-     sell.textContent='Продать за 0.5 TON';
-    }
-   });
-   card.append(art,title,source,sell);
-   list.append(card);
-  });
- }catch(error){
-  list.textContent='Не удалось загрузить коллекцию.';
- }
-}
-
-
-async function loadRating(){
- const list=document.getElementById('ratingList');
- const place=document.getElementById('ratingMyPlace');
- if(!list || !place)return;
-
- if(!tg?.initData){
-  list.textContent='Открой HARD GIFT через Telegram.';
-  return;
- }
-
- list.textContent='Загружаем рейтинг...';
-
- try{
-  const response=await fetch(API_URL+'/rating',{
-   headers:{'X-Telegram-Init-Data':tg.initData}
-  });
-  const data=await response.json();
-  if(!response.ok)throw new Error(data.error||'Ошибка загрузки');
-
-  place.textContent='🏆 Твоё место: '+(data.my_rank||'—');
-
-  list.replaceChildren();
-
-  if(!data.users || !data.users.length){
-   list.textContent='Пока рейтинг пуст.';
-   return;
-  }
-
-  data.users.forEach(item=>{
-   const card=document.createElement('div');
-   card.className='card';
-   card.style.display='flex';
-   card.style.alignItems='center';
-   card.style.gap='12px';
-
-   const avatar=document.createElement('div');
-   avatar.style.width='48px';
-   avatar.style.height='48px';
-   avatar.style.borderRadius='50%';
-   avatar.style.flexShrink='0';
-   avatar.style.overflow='hidden';
-   avatar.style.background='linear-gradient(135deg,#7040ff,#168cff)';
-   avatar.style.display='grid';
-   avatar.style.placeItems='center';
-
-   if(item.photo_url){
-    const img=document.createElement('img');
-    img.src=item.photo_url;
-    img.alt='';
-    img.style.width='100%';
-    img.style.height='100%';
-    img.style.objectFit='cover';
-    img.onerror=()=>{img.remove();avatar.textContent='👤';};
-    avatar.append(img);
-   }else{
-    avatar.textContent='👤';
-   }
-
-   const info=document.createElement('div');
-   info.style.flex='1';
-   info.style.minWidth='0';
-
-   const name=document.createElement('div');
-   name.style.fontWeight='700';
-   name.textContent=(
-    [item.first_name,item.last_name].filter(Boolean).join(' ')
-    || (item.username?'@'+item.username:'Игрок')
-   );
-
-   const nick=document.createElement('div');
-   nick.className='muted';
-   nick.style.fontSize='12px';
-   nick.textContent=item.username?'@'+item.username:'HARD GIFT';
-
-   const balance=document.createElement('div');
-   balance.style.fontWeight='700';
-   balance.style.color='#b9aaff';
-   balance.textContent=Number(item.balance).toFixed(1)+' TON';
-
-   const rank=document.createElement('div');
-   rank.style.fontSize='20px';
-   rank.style.fontWeight='800';
-   rank.style.minWidth='35px';
-   rank.style.textAlign='center';
-   rank.textContent=Number(item.rank)<=3
-    ? ['🥇','🥈','🥉'][Number(item.rank)-1]
-    : '#'+item.rank;
-
-   info.append(name,nick,balance);
-   card.append(rank,avatar,info);
-   list.append(card);
-  });
-
- }catch(error){
-  console.error('Rating:',error);
-  list.textContent='Не удалось загрузить рейтинг. Попробуй позже.';
-  place.textContent='Место пока недоступно';
- }
-}
-
-function openPage(id,button){
- document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
- const page=document.getElementById(id);
- if(page)page.classList.add('active');
- document.querySelectorAll('.nav button').forEach(b=>b.classList.remove('active'));
- if(button)button.classList.add('active');
- else{
-  const home=[...document.querySelectorAll('.nav button')].find(b=>b.textContent.includes('Главная'));
-  if(home)home.classList.add('active');
- }
- if(id==='profile'){loadInventory();loadBalance();}
- if(id==='cases')loadCases();
- if(id==='rating')loadRating();
-}
-
-let tonUI;
-function initTonConnect(){
- if(!window.TON_CONNECT_UI){document.getElementById('ton-status').textContent='TON Connect не загрузился';return;}
- try{
-  tonUI=new TON_CONNECT_UI.TonConnectUI({
-   manifestUrl:'https://neit926-crypto.github.io/hardgift/tonconnect-manifest.json',
-   buttonRootId:'ton-connect'
-  });
-  tonUI.onStatusChange(wallet=>{
-   const status=document.getElementById('ton-status');
-   if(wallet){
-    const a=wallet.account.address;
-    status.textContent='Подключён: '+a.slice(0,6)+'...'+a.slice(-6);
-   }else{
-    status.textContent='TON: не подключён';
-   }
-  });
- }catch(e){
-  document.getElementById('ton-status').textContent='Ошибка TON Connect';
-  console.error(e);
- }
-}
-
-async function updateOnline(){
- const counter=document.getElementById('online-count');
- if(!counter)return;
- try{
-  const response=await fetch(API_URL+'/online/count',{cache:'no-store'});
-  if(!response.ok)throw new Error('Online count unavailable');
-  const data=await response.json();
-  counter.textContent=Number(data.count||0)+' ONLINE';
- }catch(e){
-  counter.textContent='ONLINE';
- }
-}
-
-async function sendOnlineHeartbeat(){
- const tg=window.Telegram?.WebApp;
- if(!tg?.initData || document.visibilityState==='hidden')return;
- try{
-  await fetch(API_URL+'/online/heartbeat',{
-   method:'POST',
-   headers:{'X-Telegram-Init-Data':tg.initData}
-  });
- }catch(e){
-  console.warn('Online heartbeat:',e);
- }
- updateOnline();
-}
-
-document.addEventListener('DOMContentLoaded',()=>{
- loadCases();
- initTonConnect();
- updateOnline();
- sendOnlineHeartbeat();
- setInterval(sendOnlineHeartbeat,30000);
- setInterval(updateOnline,20000);
- document.addEventListener('visibilitychange',()=>{
-  if(document.visibilityState==='visible')sendOnlineHeartbeat();
- });
-});
-
+render();
 </script>
 </body>
 </html>
