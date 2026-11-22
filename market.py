@@ -25,9 +25,12 @@ def init_market_db():
                 currency TEXT NOT NULL DEFAULT 'TON',
                 status TEXT NOT NULL DEFAULT 'active',
                 is_demo BOOLEAN NOT NULL DEFAULT TRUE,
-                created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+                created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+                image_url TEXT NOT NULL DEFAULT ''
             )
         """)
+
+        con.execute("ALTER TABLE market_listings ADD COLUMN IF NOT EXISTS image_url TEXT NOT NULL DEFAULT ''")
 
         demos = [
             ("gift_bear", "Золотой мишка", "Коллекционный Telegram Gift", "gift", "market_demo", 10, "TON"),
@@ -65,7 +68,7 @@ def market_listings():
     query = """
         SELECT id, title, description, category,
                seller_username, price, currency,
-               is_demo, created_at
+               is_demo, image_url, created_at
         FROM market_listings
         WHERE status = 'active'
     """
@@ -99,7 +102,7 @@ def market_listing_detail(listing_id):
         row = con.execute("""
             SELECT id, title, description, category,
                    seller_username, price, currency,
-                   is_demo, created_at
+                   is_demo, image_url, created_at
             FROM market_listings
             WHERE id = %s AND status = 'active'
         """, (listing_id,)).fetchone()

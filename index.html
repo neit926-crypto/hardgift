@@ -139,13 +139,24 @@ let items = [];
 let category = 'all';
 let favorites = JSON.parse(localStorage.getItem('hg_favorites') || '[]');
 
+function safeImageUrl(value) {
+  try {
+    const url = new URL(String(value || ''));
+    return url.protocol === 'https:' ? url.href : '';
+  } catch {
+    return '';
+  }
+}
+
 function card(item) {
   const saved = favorites.includes(item.id);
   const type = item.category;
   return `<article class="card">
     <div class="art">
       <span class="kind">${type === 'gift' ? 'GIFT' : 'TON NFT'}</span>
-      ${artByName[item.title] || (type === 'gift' ? '🎁' : '💎')}
+      ${safeImageUrl(item.image_url)
+      ? `<img class="art-image" src="${escapeHtml(safeImageUrl(item.image_url))}" alt="${escapeHtml(item.title)}" loading="lazy">`
+      : (artByName[item.title] || (type === 'gift' ? '🎁' : '💎'))}
       <button class="fav" onclick="toggleFav(${item.id})">${saved ? '♥' : '♡'}</button>
     </div>
     <h3>${escapeHtml(item.title)}</h3>
@@ -228,3 +239,13 @@ loadListings();
 </script>
 </body>
 </html>
+
+<style>
+.art-image {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+  border-radius: 14px;
+}
+</style>
